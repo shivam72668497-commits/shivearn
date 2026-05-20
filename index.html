@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShivearnApp</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(255,255,255,0.15);
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    p {
+      color: #cbd5e1;
+      margin-bottom: 30px;
+      font-size: 15px;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid rgba(255,255,255,0.2);
+      border-top: 5px solid #38bdf8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      margin-top: 18px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 26px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Replace with your logo -->
+    <img src="assets/logo.png" class="logo" alt="ShivearnApp">
+
+    <h1>ShivearnApp</h1>
+    <p>Loading your experience...</p>
+
+    <div class="spinner"></div>
+    <div class="loading-text">
+      Checking authentication...
+    </div>
+  </div>
+
+  <script type="module">
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+  apiKey: "AIzaSyDYdTJdXbxZ4bUGW-wO1BRaszEUb2Q_BAg",
+  authDomain: "shivearnapp.firebaseapp.com",
+  databaseURL: "https://shivearnapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "shivearnapp",
+  storageBucket: "shivearnapp.firebasestorage.app",
+  messagingSenderId: "467728812929",
+  appId: "1:467728812929:web:a73f12827309d9c09d7680"
+};
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Check Auth State
+    onAuthStateChanged(auth, (user) => {
+
+      setTimeout(() => {
+        if (user) {
+          window.location.href = "dashboard.html";
+        } else {
+          window.location.href = "login.html";
+        }
+      }, 1500);
+
+    });
+
+  </script>
+
+</body>
+  </html>
