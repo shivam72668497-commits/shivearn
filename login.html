@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0"/>
+
+  <title>ShivearnApp Login</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body{
+      background:
+      linear-gradient(135deg,#0f172a,#1e293b);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .card{
+      background:#fff;
+      width:100%;
+      max-width:400px;
+      border-radius:25px;
+      padding:30px;
+      box-shadow:0 10px 30px rgba(0,0,0,.2);
+    }
+
+    .logo{
+      text-align:center;
+      margin-bottom:25px;
+    }
+
+    .logo h1{
+      font-size:32px;
+      color:#0f172a;
+    }
+
+    .logo p{
+      color:#666;
+      margin-top:6px;
+      font-size:14px;
+    }
+
+    .input-group{
+      margin-bottom:15px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:8px;
+      font-weight:bold;
+      font-size:14px;
+      color:#333;
+    }
+
+    input{
+      width:100%;
+      padding:14px;
+      border:1px solid #ddd;
+      border-radius:12px;
+      outline:none;
+      font-size:15px;
+    }
+
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:12px;
+      padding:15px;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:bold;
+      transition:.3s;
+    }
+
+    .otp-btn{
+      background:#2563eb;
+      color:#fff;
+      margin-top:8px;
+    }
+
+    .otp-btn:hover{
+      background:#1d4ed8;
+    }
+
+    .verify-btn{
+      background:#16a34a;
+      color:white;
+      margin-top:10px;
+    }
+
+    .google-btn{
+      background:#fff;
+      border:1px solid #ddd;
+      color:#333;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      margin-top:15px;
+    }
+
+    .google-btn img{
+      width:22px;
+    }
+
+    .divider{
+      text-align:center;
+      margin:20px 0;
+      color:#777;
+      position:relative;
+    }
+
+    .divider::before,
+    .divider::after{
+      content:'';
+      width:40%;
+      height:1px;
+      background:#ddd;
+      position:absolute;
+      top:50%;
+    }
+
+    .divider::before{
+      left:0;
+    }
+
+    .divider::after{
+      right:0;
+    }
+
+    #otpSection{
+      display:none;
+    }
+
+    .error{
+      color:red;
+      text-align:center;
+      margin-top:10px;
+      font-size:14px;
+    }
+
+    .success{
+      color:green;
+      text-align:center;
+      margin-top:10px;
+      font-size:14px;
+    }
+
+    @media(max-width:480px){
+      .card{
+        padding:25px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="logo">
+    <h1>ShivearnApp</h1>
+    <p>Login with OTP or Google</p>
+  </div>
+
+  <!-- Phone Number -->
+  <div class="input-group">
+    <label>Phone Number</label>
+    <input
+      type="tel"
+      id="phone"
+      placeholder="+91 9876543210"
+    />
+  </div>
+
+  <button class="btn otp-btn"
+  id="sendOtpBtn">
+    Send OTP
+  </button>
+
+  <!-- OTP -->
+  <div id="otpSection">
+
+    <div class="input-group"
+    style="margin-top:15px;">
+
+      <label>Enter OTP</label>
+
+      <input
+      type="number"
+      id="otp"
+      placeholder="Enter 6 digit OTP"/>
+
+    </div>
+
+    <button class="btn verify-btn"
+    id="verifyBtn">
+      Verify OTP
+    </button>
+
+  </div>
+
+  <div id="recaptcha-container"></div>
+
+  <div class="divider">OR</div>
+
+  <!-- Google Login -->
+  <button class="btn google-btn"
+  id="googleBtn">
+
+    <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png">
+
+    Continue with Google
+  </button>
+
+  <div class="error"
+  id="error"></div>
+
+  <div class="success"
+  id="success"></div>
+
+</div>
+
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+/* Firebase Config */
+const firebaseConfig = {
+  apiKey: "AIzaSyDYdTJdXbxZ4bUGW-wO1BRaszEUb2Q_BAg",
+  authDomain: "https://shivam72668497-commits.github.io/shivearn/",
+  projectId: "shivearnapp",
+  storageBucket: "shivearnapp.firebasestorage.app",
+  messagingSenderId: "467728812929",
+  appId: "1:467728812929:web:a73f12827309d9c09d7680"
+};
+
+
+const app =
+initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const provider =
+new GoogleAuthProvider();
+
+const phoneInput =
+document.getElementById("phone");
+
+const otpInput =
+document.getElementById("otp");
+
+const sendOtpBtn =
+document.getElementById("sendOtpBtn");
+
+const verifyBtn =
+document.getElementById("verifyBtn");
+
+const googleBtn =
+document.getElementById("googleBtn");
+
+const otpSection =
+document.getElementById("otpSection");
+
+const error =
+document.getElementById("error");
+
+const success =
+document.getElementById("success");
+
+let confirmationResult;
+
+
+// Auto Redirect
+onAuthStateChanged(auth,
+(user)=>{
+
+  if(user){
+    window.location.href =
+    "dashboard.html";
+  }
+
+});
+
+
+// Setup reCAPTCHA
+window.recaptchaVerifier =
+new RecaptchaVerifier(auth,
+"recaptcha-container",
+{
+  size:"normal"
+});
+
+
+// Send OTP
+sendOtpBtn.addEventListener(
+"click", async ()=>{
+
+error.innerText = "";
+success.innerText = "";
+
+const phone =
+phoneInput.value.trim();
+
+if(!phone){
+
+error.innerText =
+"Enter phone number";
+
+return;
+
+}
+
+sendOtpBtn.innerText =
+"Sending...";
+
+sendOtpBtn.disabled =
+true;
+
+try{
+
+confirmationResult =
+await signInWithPhoneNumber(
+auth,
+phone,
+window.recaptchaVerifier
+);
+
+otpSection.style.display =
+"block";
+
+success.innerText =
+"OTP Sent Successfully";
+
+}catch(err){
+
+error.innerText =
+err.message;
+
+}
+
+sendOtpBtn.innerText =
+"Send OTP";
+
+sendOtpBtn.disabled =
+false;
+
+});
+
+
+// Verify OTP
+verifyBtn.addEventListener(
+"click", async ()=>{
+
+error.innerText = "";
+
+const otp =
+otpInput.value.trim();
+
+if(!otp){
+
+error.innerText =
+"Enter OTP";
+
+return;
+
+}
+
+verifyBtn.innerText =
+"Verifying...";
+
+verifyBtn.disabled =
+true;
+
+try{
+
+await confirmationResult.confirm(
+otp
+);
+
+window.location.href =
+"dashboard.html";
+
+}catch(err){
+
+error.innerText =
+"Invalid OTP";
+
+}
+
+verifyBtn.innerText =
+"Verify OTP";
+
+verifyBtn.disabled =
+false;
+
+});
+
+
+// Google Login
+googleBtn.addEventListener(
+"click", async ()=>{
+
+try{
+
+await signInWithPopup(
+auth,
+provider
+);
+
+window.location.href =
+"dashboard.html";
+
+}catch(err){
+
+error.innerText =
+err.message;
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
