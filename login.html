@@ -324,7 +324,7 @@
     </button>
 
     <div class="bottom-link">
-      Don’t have an account? <a href="register.html">Create Account</a>
+      Don't have an account? <a href="register.html">Create Account</a>
     </div>
   </div>
 
@@ -356,6 +356,11 @@
     const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
 
+    // ✅ FIX: Set scope to get email explicitly
+    provider.addScope('profile');
+    provider.addScope('email');
+    provider.setCustomParameters({ 'login_hint': 'user@example.com' });
+
     const globalLoader = document.getElementById("global-loader");
     const loginForm = document.getElementById("login-form");
     const emailInput = document.getElementById("email");
@@ -370,10 +375,27 @@
     const errorAlert = document.getElementById("error-alert");
     const errorMessage = document.getElementById("error-message");
 
-    function showGlobalLoader() { globalLoader.style.visibility = "visible"; globalLoader.style.opacity = "1"; }
-    function hideGlobalLoader() { globalLoader.style.visibility = "hidden"; globalLoader.style.opacity = "0"; }
-    function showError(msg) { errorMessage.textContent = msg; errorAlert.style.display = "flex"; }
-    function clearError() { errorAlert.style.display = "none"; }
+    // ✅ FIX: Track redirect result processing
+    let isProcessingRedirect = false;
+
+    function showGlobalLoader() { 
+      globalLoader.style.visibility = "visible"; 
+      globalLoader.style.opacity = "1"; 
+    }
+
+    function hideGlobalLoader() { 
+      globalLoader.style.visibility = "hidden"; 
+      globalLoader.style.opacity = "0"; 
+    }
+
+    function showError(msg) { 
+      errorMessage.textContent = msg; 
+      errorAlert.style.display = "flex"; 
+    }
+
+    function clearError() { 
+      errorAlert.style.display = "none"; 
+    }
 
     function setSubmittingState(isLoading, method = 'email') {
       btnSubmit.disabled = isLoading;
@@ -402,16 +424,28 @@
       togglePassword.classList.toggle("fa-eye-slash", isPassword);
     });
 
+    // ✅ FIX: Improved syncUserProfile with better error handling
     async function syncUserProfile(user) {
       try {
+        if (!user) {
+          throw new Error("User data is null or undefined");
+        }
+
+        console.log("Syncing user profile:", {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL
+        });
+
         const userRef = ref(db, `users/${user.uid}`);
         const snapshot = await get(userRef);
 
         if (!snapshot.exists()) {
-          await set(userRef, {
+          const userData = {
             uid: user.uid,
+            email: user.email || "no-email@example.com",
             name: user.displayName || "User",
-            email: user.email || "",
             photoURL: user.photoURL || "",
             balance: 0,
             coins: 0,
@@ -421,43 +455,70 @@
             role: "user",
             status: "active",
             referCode: user.uid.slice(0, 6),
-            createdAt: Date.now()
-          });
+            createdAt: new Date().toISOString()
+          };
+
+          await set(userRef, userData);
+          console.log("User profile created successfully");
+        } else {
+          console.log("User profile already exists");
         }
+
+        // ✅ FIX: Add small delay to ensure database write completes
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        console.log("Redirecting to dashboard...");
         window.location.href = "dashboard.html";
       } catch (err) {
-        console.error(err);
-        showError("Database synchronization failure. Please try again.");
+        console.error("Error syncing user profile:", err);
+        showError("Database sync error: " + (err.message || "Unknown error"));
         hideGlobalLoader();
         setSubmittingState(false);
       }
     }
 
+    // ✅ FIX: Improved initAuthWorkflow with proper redirect handling
     async function initAuthWorkflow() {
       try {
+        console.log("Starting auth workflow...");
+
+        // ✅ FIX: Check redirect result first (from Google callback)
         const redirectResult = await getRedirectResult(auth);
+        
         if (redirectResult?.user) {
+          console.log("Redirect result found, processing user...");
+          isProcessingRedirect = true;
           showGlobalLoader();
           await syncUserProfile(redirectResult.user);
-          return; 
+          return;
         }
+
+        console.log("No redirect result, checking auth state...");
+
+        // ✅ FIX: Only set up auth state listener if not processing redirect
+        onAuthStateChanged(auth, async (user) => {
+          if (user && !isProcessingRedirect) {
+            console.log("User logged in via onAuthStateChanged:", user.email);
+            showGlobalLoader();
+            await syncUserProfile(user);
+          } else if (!user) {
+            console.log("No user logged in");
+            hideGlobalLoader();
+          }
+        });
       } catch (error) {
-        showError(getCleanAuthErrorMessage(error.code));
+        console.error("Auth workflow error:", error);
+        if (error.code) {
+          showError(getCleanAuthErrorMessage(error.code));
+        } else {
+          showError("Authentication error: " + error.message);
+        }
         hideGlobalLoader();
         setSubmittingState(false);
-        return; 
       }
-
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          showGlobalLoader();
-          await syncUserProfile(user);
-        } else {
-          hideGlobalLoader();
-        }
-      });
     }
 
+    // Email/Password login
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = emailInput.value.trim();
@@ -465,43 +526,62 @@
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        showError("Please enter a valid email address structure.");
+        showError("Please enter a valid email address.");
+        return;
+      }
+
+      if (password.length < 6) {
+        showError("Password must be at least 6 characters.");
         return;
       }
 
       setSubmittingState(true, 'email');
       try {
+        console.log("Attempting email/password login...");
         await signInWithEmailAndPassword(auth, email, password);
+        console.log("Email/password login successful");
       } catch (error) {
+        console.error("Login error:", error);
         showError(getCleanAuthErrorMessage(error.code));
         setSubmittingState(false);
       }
     });
 
+    // ✅ FIX: Google login with better error handling
     btnGoogle.addEventListener("click", async () => {
       setSubmittingState(true, 'google');
       try {
+        console.log("Starting Google authentication...");
         await signInWithRedirect(auth, provider);
+        // Note: Page will redirect, so this line won't execute
       } catch (error) {
+        console.error("Google auth error:", error);
         showError(getCleanAuthErrorMessage(error.code));
         setSubmittingState(false);
       }
     });
 
     function getCleanAuthErrorMessage(errorCode) {
-      switch (errorCode) {
-        case "auth/invalid-email": return "Malformed email configuration entered.";
-        case "auth/user-disabled": return "This account ecosystem access has been suspended.";
-        case "auth/user-not-found":
-        case "auth/wrong-password":
-        case "auth/invalid-credential": return "Invalid account credentials provided.";
-        case "auth/network-request-failed": return "Network link breakdown identified. Check connection.";
-        case "auth/too-many-requests": return "Requests throttled due to high frequency. Try later.";
-        default: return "An internal interface routing exception occurred.";
-      }
+      const errorMessages = {
+        "auth/invalid-email": "Invalid email format. Please check your email.",
+        "auth/user-disabled": "This account has been disabled.",
+        "auth/user-not-found": "Email not found. Please register first.",
+        "auth/wrong-password": "Incorrect password. Please try again.",
+        "auth/invalid-credential": "Invalid credentials. Please check your details.",
+        "auth/invalid-password": "Password must be at least 6 characters.",
+        "auth/network-request-failed": "Network error. Check your internet connection.",
+        "auth/too-many-requests": "Too many login attempts. Try again later.",
+        "auth/operation-not-allowed": "Email/password login is not enabled.",
+        "auth/popup-blocked": "Sign-in popup was blocked. Enable popups.",
+        "auth/cancelled-popup-request": "Sign-in cancelled.",
+      };
+      return errorMessages[errorCode] || "An authentication error occurred. Please try again.";
     }
 
-    initAuthWorkflow();
+    // ✅ FIX: Initialize auth workflow after page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuthWorkflow();
+    });
   </script>
 </body>
 </html>
