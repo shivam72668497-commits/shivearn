@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShivearnApp - Welcome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-gradient-start: #0f172a; /* Slate 900 */
+      --bg-gradient-end: #1e1b4b;   /* Indigo 950 */
+      --text-main: #f8fafc;         /* Slate 50 */
+      --text-muted: #94a3b8;        /* Slate 400 */
+      --accent: #10b981;            /* Emerald 500 */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    /* Premium Splash Router Container */
+    .splash-container {
+      text-align: center;
+      animation: fadeIn 0.6s ease-out;
+      padding: 20px;
+    }
+
+    .brand-logo {
+      font-size: 2.75rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #10b981, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+      display: inline-block;
+      animation: pulseLogo 2s infinite ease-in-out;
+    }
+
+    .brand-logo i {
+      background: linear-gradient(to right, #10b981, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-text {
+      color: var(--text-main);
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .sub-status {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    /* Modern Linear Processing Bar Instead of Spinner */
+    .loader-track {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .loader-bar {
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(to right, var(--accent), #3b82f6);
+      border-radius: 2px;
+      position: absolute;
+      animation: loadingStream 1.4s infinite ease-in-out;
+    }
+
+    /* Manual Fallback Option if scripts are heavily throttled or blocked */
+    .fallback-link {
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: none; /* Appears only if loading takes too long */
+      animation: fadeIn 1s ease-forward;
+    }
+
+    .fallback-link a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .fallback-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseLogo {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(1.03); opacity: 1; }
+    }
+
+    @keyframes loadingStream {
+      0% { left: -60%; }
+      50% { left: 40%; width: 40%; }
+      100% { left: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="splash-container">
+    <h1 class="brand-logo"><i class="fa-solid fa-wallet"></i> ShivearnApp</h1>
+    <p class="status-text" id="routing-status">Securing connection...</p>
+    <p class="sub-status">Verifying runtime synchronization tokens</p>
+    
+    <div class="loader-track">
+      <div class="loader-bar"></div>
+    </div>
+
+    <div class="fallback-link" id="fallback-ui">
+      Taking too long? <a href="login.html">Click here to manually log in</a>.
+    </div>
+  </div>
+
+  <script type="module">
+    // Import global centralized initialization stack modules
+    import { auth } from "./assets/firebaseconfig.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const statusText = document.getElementById("routing-status");
+    const fallbackUi = document.getElementById("fallback-ui");
+
+    // Reveal safe exit link if network is incredibly slow (after 5 seconds)
+    setTimeout(() => {
+      if (fallbackUi) fallbackUi.style.display = "block";
+    }, 5000);
+
+    // Core Gateway Routing Rule Engine
+    try {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          statusText.textContent = "Redirecting to Dashboard...";
+          window.location.href = "dashboard.html";
+        } else {
+          statusText.textContent = "Redirecting to Login...";
+          window.location.href = "login.html";
+        }
+      });
+    } catch (error) {
+      console.error("Critical Gateway Router Exception:", error);
+      // Fallback redirection to prevent infinite freeze states
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
