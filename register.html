@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - ShivearnApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-gradient-start: #0f172a;
+      --bg-gradient-end: #1e1b4b;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --input-bg: #0f172a;
+      --input-border: #334155;
+      --input-focus: #6366f1;
+      --error-bg: rgba(239, 68, 68, 0.2);
+      --error-text: #f87171;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body {
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: var(--text-main);
+    }
+
+    .signup-container {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-header { text-align: center; margin-bottom: 28px; }
+    .brand-logo {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #10b981, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .brand-subtitle { color: var(--text-muted); font-size: 0.95rem; }
+
+    .form-group { margin-bottom: 18px; position: relative; }
+    .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+    .input-wrapper { position: relative; }
+    .input-wrapper i.input-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 1.1rem;
+    }
+
+    .form-input {
+      width: 100%; padding: 14px 16px 14px 44px;
+      background-color: var(--input-bg); border: 1px solid var(--input-border);
+      border-radius: 12px; color: var(--text-main); font-size: 0.95rem;
+      outline: none; transition: all 0.2s ease;
+    }
+    .form-input:focus { border-color: var(--input-focus); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+
+    .btn {
+      width: 100%; padding: 14px; border-radius: 12px; font-size: 1rem;
+      font-weight: 600; cursor: pointer; border: none; display: flex;
+      justify-content: center; align-items: center; gap: 10px; transition: all 0.2s ease;
+    }
+    .btn-primary { background-color: var(--accent); color: #ffffff; margin-top: 10px; }
+    .btn-primary:hover:not(:disabled) { background-color: var(--accent-hover); transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .alert {
+      background-color: var(--error-bg); border-left: 4px solid #ef4444; color: var(--error-text);
+      padding: 12px 16px; border-radius: 8px; font-size: 0.875rem; margin-bottom: 20px;
+      display: none; align-items: center; gap: 10px; animation: fadeIn 0.3s ease;
+    }
+
+    .btn-spinner {
+      width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3);
+      border-left-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; display: none;
+    }
+
+    .bottom-link { text-align: center; margin-top: 24px; font-size: 0.9rem; color: var(--text-muted); }
+    .bottom-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .bottom-link a:hover { text-decoration: underline; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="signup-container">
+    <div class="brand-header">
+      <h1 class="brand-logo"><i class="fa-solid fa-user-plus"></i> ShivearnApp</h1>
+      <p class="brand-subtitle">Create your new metrics account system profile</p>
+    </div>
+
+    <div id="error-alert" class="alert">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="error-message">An unexpected signup logic exception occurred.</span>
+    </div>
+
+    <form id="signup-form">
+      <div class="form-group">
+        <label class="form-label" for="username">Full Name</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-user input-icon"></i>
+          <input type="text" id="username" class="form-input" placeholder="John Doe" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="email" class="form-input" placeholder="name@example.com" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-lock input-icon"></i>
+          <input type="password" id="password" class="form-input" placeholder="Min. 6 Characters" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="confirm-password">Confirm Password</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-shield-halved input-icon"></i>
+          <input type="password" id="confirm-password" class="form-input" placeholder="Repeat Password" required>
+        </div>
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn btn-primary">
+        <span class="btn-spinner" id="submit-spinner"></span>
+        <span id="submit-text">Create Account</span>
+      </button>
+    </form>
+
+    <div class="bottom-link">
+      Already have an account? <a href="login.html">Log In</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYdTJdXbxZ4bUGW-wO1BRaszEUb2Q_BAg",
+      authDomain: "shivearnapp.firebaseapp.com",
+      databaseURL: "https://shivearnapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "shivearnapp",
+      storageBucket: "shivearnapp.firebasestorage.app",
+      messagingSenderId: "467728812929",
+      appId: "1:467728812929:web:a73f12827309d9c09d7680",
+      measurementId: "G-VNWL648MN6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const signupForm = document.getElementById("signup-form");
+    const nameInput = document.getElementById("username");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirm-password");
+    const btnSubmit = document.getElementById("btn-submit");
+    const submitSpinner = document.getElementById("submit-spinner");
+    const submitText = document.getElementById("submit-text");
+    const errorAlert = document.getElementById("error-alert");
+    const errorMessage = document.getElementById("error-message");
+
+    function showError(msg) { errorMessage.textContent = msg; errorAlert.style.display = "flex"; }
+    function clearError() { errorAlert.style.display = "none"; }
+
+    function setSubmittingState(isLoading) {
+      btnSubmit.disabled = isLoading;
+      if (isLoading) {
+        clearError();
+        submitSpinner.style.display = "inline-block";
+        submitText.textContent = "Creating Account...";
+      } else {
+        submitSpinner.style.display = "none";
+        submitText.textContent = "Create Account";
+      }
+    }
+
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+
+      if (password.length < 6) {
+        showError("Password must be at least 6 characters long.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        showError("Passwords choices do not match.");
+        return;
+      }
+
+      setSubmittingState(true);
+
+      try {
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(credential.user, { displayName: name });
+        
+        await set(ref(db, `users/${credential.user.uid}`), {
+          uid: credential.user.uid,
+          name: name,
+          email: email,
+          photoURL: "",
+          balance: 0,
+          coins: 0,
+          totalEarned: 0,
+          completedTasks: 0,
+          withdrawTotal: 0,
+          role: "user",
+          status: "active",
+          referCode: credential.user.uid.slice(0, 6),
+          createdAt: Date.now()
+        });
+
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        console.error(error);
+        if (error.code === "auth/email-already-in-use") {
+          showError("This email address is already registered inside our system.");
+        } else {
+          showError(error.message || "Failed to create user directory entry structure.");
+        }
+        setSubmittingState(false);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - ShivearnApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-gradient-start: #0f172a;
+      --bg-gradient-end: #1e1b4b;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --input-bg: #0f172a;
+      --input-border: #334155;
+      --input-focus: #6366f1;
+      --error-bg: rgba(239, 68, 68, 0.2);
+      --error-text: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    #global-loader {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-left-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .brand-logo {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #10b981, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .brand-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i.input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .password-toggle:hover {
+      color: var(--text-main);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      margin-top: 10px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-google {
+      background-color: #ffffff;
+      color: #1e293b;
+      margin-top: 16px;
+    }
+
+    .btn-google:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 24px 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--input-border);
+    }
+
+    .divider:not(:empty)::before { margin-right: .75em; }
+    .divider:not(:empty)::after { margin-left: .75em; }
+
+    .alert {
+      background-color: var(--error-bg);
+      border-left: 4px solid #ef4444;
+      color: var(--error-text);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-left-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .bottom-link {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .bottom-link a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .bottom-link a:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .login-container { padding: 28px 20px; border-radius: 20px; }
+      body { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="global-loader">
+    <div class="spinner"></div>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Verifying authentication state...</p>
+  </div>
+
+  <div class="login-container">
+    <div class="brand-header">
+      <h1 class="brand-logo"><i class="fa-solid fa-wallet"></i> ShivearnApp</h1>
+      <p class="brand-subtitle">Log in to unlock your earnings dashboard</p>
+    </div>
+
+    <div id="error-alert" class="alert">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="error-message">An unexpected error occurred.</span>
+    </div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="email" class="form-input" placeholder="name@example.com" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-lock input-icon"></i>
+          <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+          <i class="fa-solid fa-eye password-toggle" id="toggle-password"></i>
+        </div>
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn btn-primary">
+        <span class="btn-spinner" id="submit-spinner"></span>
+        <span id="submit-text">Log In</span>
+      </button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <button type="button" id="btn-google" class="btn btn-google">
+      <span class="btn-spinner" id="google-spinner" style="border-left-color: #1e293b;"></span>
+      <i class="fa-brands fa-google" id="google-icon" style="color: #ea4335;"></i>
+      <span>Continue with Google</span>
+    </button>
+
+    <div class="bottom-link">
+      Don’t have an account? <a href="register.html">Create Account</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      signInWithRedirect, 
+      GoogleAuthProvider, 
+      getRedirectResult, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYdTJdXbxZ4bUGW-wO1BRaszEUb2Q_BAg",
+      authDomain: "shivearnapp.firebaseapp.com",
+      databaseURL: "https://shivearnapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "shivearnapp",
+      storageBucket: "shivearnapp.firebasestorage.app",
+      messagingSenderId: "467728812929",
+      appId: "1:467728812929:web:a73f12827309d9c09d7680",
+      measurementId: "G-VNWL648MN6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    const globalLoader = document.getElementById("global-loader");
+    const loginForm = document.getElementById("login-form");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("toggle-password");
+    const btnSubmit = document.getElementById("btn-submit");
+    const submitSpinner = document.getElementById("submit-spinner");
+    const submitText = document.getElementById("submit-text");
+    const btnGoogle = document.getElementById("btn-google");
+    const googleSpinner = document.getElementById("google-spinner");
+    const googleIcon = document.getElementById("google-icon");
+    const errorAlert = document.getElementById("error-alert");
+    const errorMessage = document.getElementById("error-message");
+
+    function showGlobalLoader() { globalLoader.style.visibility = "visible"; globalLoader.style.opacity = "1"; }
+    function hideGlobalLoader() { globalLoader.style.visibility = "hidden"; globalLoader.style.opacity = "0"; }
+    function showError(msg) { errorMessage.textContent = msg; errorAlert.style.display = "flex"; }
+    function clearError() { errorAlert.style.display = "none"; }
+
+    function setSubmittingState(isLoading, method = 'email') {
+      btnSubmit.disabled = isLoading;
+      btnGoogle.disabled = isLoading;
+      if (isLoading) {
+        clearError();
+        if (method === 'email') {
+          submitSpinner.style.display = "inline-block";
+          submitText.textContent = "Authenticating...";
+        } else {
+          googleSpinner.style.display = "inline-block";
+          googleIcon.style.display = "none";
+        }
+      } else {
+        submitSpinner.style.display = "none";
+        submitText.textContent = "Log In";
+        googleSpinner.style.display = "none";
+        googleIcon.style.display = "inline-block";
+      }
+    }
+
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      togglePassword.classList.toggle("fa-eye", !isPassword);
+      togglePassword.classList.toggle("fa-eye-slash", isPassword);
+    });
+
+    async function syncUserProfile(user) {
+      try {
+        const userRef = ref(db, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+
+        if (!snapshot.exists()) {
+          await set(userRef, {
+            uid: user.uid,
+            name: user.displayName || "User",
+            email: user.email || "",
+            photoURL: user.photoURL || "",
+            balance: 0,
+            coins: 0,
+            totalEarned: 0,
+            completedTasks: 0,
+            withdrawTotal: 0,
+            role: "user",
+            status: "active",
+            referCode: user.uid.slice(0, 6),
+            createdAt: Date.now()
+          });
+        }
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        console.error(err);
+        showError("Database synchronization failure. Please try again.");
+        hideGlobalLoader();
+        setSubmittingState(false);
+      }
+    }
+
+    async function initAuthWorkflow() {
+      try {
+        const redirectResult = await getRedirectResult(auth);
+        if (redirectResult?.user) {
+          showGlobalLoader();
+          await syncUserProfile(redirectResult.user);
+          return; 
+        }
+      } catch (error) {
+        showError(getCleanAuthErrorMessage(error.code));
+        hideGlobalLoader();
+        setSubmittingState(false);
+        return; 
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          showGlobalLoader();
+          await syncUserProfile(user);
+        } else {
+          hideGlobalLoader();
+        }
+      });
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showError("Please enter a valid email address structure.");
+        return;
+      }
+
+      setSubmittingState(true, 'email');
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        showError(getCleanAuthErrorMessage(error.code));
+        setSubmittingState(false);
+      }
+    });
+
+    btnGoogle.addEventListener("click", async () => {
+      setSubmittingState(true, 'google');
+      try {
+        await signInWithRedirect(auth, provider);
+      } catch (error) {
+        showError(getCleanAuthErrorMessage(error.code));
+        setSubmittingState(false);
+      }
+    });
+
+    function getCleanAuthErrorMessage(errorCode) {
+      switch (errorCode) {
+        case "auth/invalid-email": return "Malformed email configuration entered.";
+        case "auth/user-disabled": return "This account ecosystem access has been suspended.";
+        case "auth/user-not-found":
+        case "auth/wrong-password":
+        case "auth/invalid-credential": return "Invalid account credentials provided.";
+        case "auth/network-request-failed": return "Network link breakdown identified. Check connection.";
+        case "auth/too-many-requests": return "Requests throttled due to high frequency. Try later.";
+        default: return "An internal interface routing exception occurred.";
+      }
+    }
+
+    initAuthWorkflow();
+  </script>
+</body>
+</html>
