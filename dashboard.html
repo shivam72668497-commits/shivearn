@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - Shivearnapp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0b0e14;
+            --bg-card: #131926;
+            --bg-input: #0b0e14;
+            --border: #1f2a3f;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-purple: #a855f7;
+            --accent-blue: #3b82f6;
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+            --accent-yellow: #f1c40f;
+            --accent-cyan: #06b6d4;
+            --shadow: 0 2px 12px rgba(0,0,0,0.35);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: 0.2s ease;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding-bottom: 90px;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            background-color: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+        .navbar .logo {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--accent-purple);
+            text-decoration: none;
+        }
+        .navbar .bell-btn {
+            color: var(--accent-yellow);
+            font-size: 19px;
+            cursor: pointer;
+        }
+        .container {
+            padding: 16px 14px;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .welcome-card {
+            background: linear-gradient(135deg, #1e1a2e, #1a1030);
+            border: 1px solid #2d234a;
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .welcome-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-purple);
+        }
+        .welcome-info h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .welcome-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .stat-box {
+            background: var(--bg-card);
+            padding: 16px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .stat-box i {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+        .stat-box .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .stat-box .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .stat-earnings i { color: var(--accent-green); }
+        .stat-tasks i { color: var(--accent-blue); }
+        .stat-referral i { color: var(--accent-purple); }
+        .stat-withdraw i { color: var(--accent-yellow); }
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            flex: 1;
+            min-width: 70px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 8px;
+            text-align: center;
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        .action-btn:active { transform: scale(0.95); background: #1a2236; }
+        .action-tasks i { color: var(--accent-blue); }
+        .action-withdraw i { color: var(--accent-red); }
+        .action-refer i { color: var(--accent-green); }
+        .action-history i { color: var(--accent-cyan); }
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .task-preview {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .task-preview:active { background: #1a2236; }
+        .task-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .task-info p { font-size: 12px; color: var(--text-secondary); }
+        .task-reward {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .announce-card {
+            background: linear-gradient(135deg, #1a1030, #1e1a2e);
+            border: 1px solid #2d234a;
+            border-radius: var(--radius-lg);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .announce-card i.fa-bullhorn { color: var(--accent-purple); font-size: 20px; }
+        .announce-content p { font-size: 12px; color: #cbd5e1; font-weight: 500; }
+        .withdraw-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 18px 16px;
+        }
+        .withdraw-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .input-group { margin-bottom: 12px; }
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: #fff;
+            background: var(--bg-input);
+            outline: none;
+        }
+        .input-field:focus { border-color: var(--accent-blue); }
+        .withdraw-btn {
+            width: 100%;
+            background: var(--accent-red);
+            color: #fff;
+            border: none;
+            padding: 13px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .withdraw-btn:active { transform: scale(0.97); }
+        .withdraw-btn:disabled { background: #555; cursor: not-allowed; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-card);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0 12px;
+            border-top: 1px solid var(--border);
+            z-index: 1000;
+            box-shadow: 0 -2px 12px rgba(0,0,0,0.3);
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 500;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        .bottom-nav-item i { font-size: 18px; }
+        .bottom-nav-item.active { color: var(--accent-blue); }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            animation: toastIn 0.35s ease, toastOut 0.35s ease 2s forwards;
+            pointer-events: none;
+        }
+        .toast.success { border-color: var(--accent-green); color: var(--accent-green); }
+        .toast.error { border-color: var(--accent-red); color: #f87171; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="dashboard.html" class="logo">Shivearnapp</a>
+        <i class="fas fa-bell bell-btn" id="bell-btn"></i>
+    </nav>
+
+    <main class="container">
+        <!-- Welcome -->
+        <div class="welcome-card">
+            <img id="dash-avatar" src="https://via.placeholder.com/52/1e293b/94a3b8?text=U" alt="Avatar" class="welcome-avatar">
+            <div class="welcome-info">
+                <h2 id="welcome-name">Hello, User</h2>
+                <p id="welcome-email">user@example.com</p>
+            </div>
+        </div>
+
+        <!-- Stats Grid (Coins & Balance) -->
+        <div class="stats-grid">
+            <div class="stat-box stat-earnings">
+                <i class="fas fa-coins"></i>
+                <div class="stat-value" id="stat-earnings">
+                    <span>🪙 0</span><br><small>₹0.00</small>
+                </div>
+                <div class="stat-label">Balance</div>
+            </div>
+            <div class="stat-box stat-tasks">
+                <i class="fas fa-check-circle"></i>
+                <div class="stat-value" id="stat-tasks-done">0</div>
+                <div class="stat-label">Tasks Done</div>
+            </div>
+            <div class="stat-box stat-referral">
+                <i class="fas fa-users"></i>
+                <div class="stat-value" id="stat-referrals">0</div>
+                <div class="stat-label">Referrals</div>
+            </div>
+            <div class="stat-box stat-withdraw">
+                <i class="fas fa-money-bill-wave"></i>
+                <div class="stat-value" id="stat-withdrawn">₹0.00</div>
+                <div class="stat-label">Withdrawn</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="tasks.html" class="action-btn action-tasks"><i class="fas fa-clipboard-list"></i><span>Tasks</span></a>
+            <a href="#withdraw" class="action-btn action-withdraw"><i class="fas fa-hand-holding-usd"></i><span>Withdraw</span></a>
+            <a href="refer.html" class="action-btn action-refer"><i class="fas fa-gift"></i><span>Refer</span></a>
+            <a href="completedTasks.html" class="action-btn action-history"><i class="fas fa-history"></i><span>History</span></a>
+        </div>
+
+        <!-- Latest Task Preview -->
+        <div>
+            <div class="section-title"><i class="fas fa-star"></i> Available Task</div>
+            <a href="tasks.html" class="task-preview" id="task-preview">
+                <div class="task-info">
+                    <h4 id="task-title">Complete a survey</h4>
+                    <p id="task-desc">Earn by sharing your opinion</p>
+                </div>
+                <div class="task-reward" id="task-reward">+₹5</div>
+            </a>
+        </div>
+
+        <!-- Announcement -->
+        <div class="announce-card" id="announce-card">
+            <i class="fas fa-bullhorn"></i>
+            <div class="announce-content">
+                <p id="announce-text">🎉 New tasks added! Check the tasks page now.</p>
+            </div>
+        </div>
+
+        <!-- Withdraw Section -->
+        <div class="withdraw-section" id="withdraw">
+            <h3><i class="fas fa-wallet"></i> Withdraw Funds</h3>
+            <div class="input-group">
+                <label>Amount (₹)</label>
+                <input type="number" id="withdraw-amount" class="input-field" placeholder="Min ₹100" min="100" step="1">
+            </div>
+            <div class="input-group">
+                <label>Payment Method</label>
+                <select id="withdraw-method" class="input-field">
+                    <option value="upi">UPI</option>
+                    <option value="bank">Bank Transfer</option>
+                    <option value="paypal">PayPal</option>
+                </select>
+            </div>
+            <button id="withdraw-btn" class="withdraw-btn"><i class="fas fa-paper-plane"></i> Request Withdrawal</button>
+            <p style="font-size:10px; color:var(--text-muted); margin-top:8px; text-align:center;">
+                Processing time: 24-48 hours • Daily limit: 1 request
+            </p>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="tasks.html" class="bottom-nav-item"><i class="fas fa-clipboard-list"></i><span>Tasks</span></a>
+        <a href="dashboard.html#withdraw" class="bottom-nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <a href="completedTasks.html" class="bottom-nav-item"><i class="fas fa-history"></i><span>History</span></a>
+        <a href="profile.html" class="bottom-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, update, push, query, orderByChild, equalTo, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYdTJdXbxZ4bUGW-wO1BRaszEUb2Q_BAg",
+            authDomain: "shivearnapp.firebaseapp.com",
+            databaseURL: "https://shivearnapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "shivearnapp",
+            storageBucket: "shivearnapp.firebasestorage.app",
+            messagingSenderId: "467728812929",
+            appId: "1:467728812929:web:a73f12827309d9c09d7680"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let coinValue = 0.02;
+        let minWithdraw = 100;
+        let maxWithdraw = 300;
+        let dailyLimit = 1;
+        let welcomeBonusCoins = 20;
+
+        // ──────────────────────────────────────
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadGlobalSettings();
+                await loadDashboard(user.uid);
+                await checkWelcomeBonus(user.uid);
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        async function loadGlobalSettings() {
+            try {
+                const coinSnap = await get(ref(db, 'settings/coinSystem'));
+                if (coinSnap.exists()) {
+                    const c = coinSnap.val();
+                    coinValue = c.coinValue || 0.02;
+                }
+                const wbSnap = await get(ref(db, 'settings/welcomeBonus'));
+                if (wbSnap.exists() && wbSnap.val().enabled) {
+                    welcomeBonusCoins = wbSnap.val().coins || 20;
+                }
+                const wSnap = await get(ref(db, 'settings/withdraw'));
+                if (wSnap.exists() && wSnap.val().enabled) {
+                    const w = wSnap.val();
+                    minWithdraw = w.minimumAmount || 100;
+                    maxWithdraw = w.maximumAmount || 300;
+                    dailyLimit = w.dailyWithdrawLimit || 1;
+                    document.getElementById('withdraw-amount').placeholder = `Min ₹${minWithdraw} - Max ₹${maxWithdraw}`;
+                    document.getElementById('withdraw-amount').min = minWithdraw;
+                    document.getElementById('withdraw-amount').max = maxWithdraw;
+                }
+            } catch (e) { console.warn('Settings load error', e); }
+        }
+
+        async function checkWelcomeBonus(uid) {
+            const userRef = ref(db, 'users/' + uid);
+            const snap = await get(userRef);
+            if (!snap.exists()) return;
+            const userData = snap.val();
+            if (!userData.welcomeBonusClaimed) {
+                const newCoins = (userData.coins || 0) + welcomeBonusCoins;
+                const newBalance = parseFloat((newCoins * coinValue).toFixed(2));
+                const totalEarned = (userData.totalEarned || 0) + (welcomeBonusCoins * coinValue);
+                await update(userRef, {
+                    coins: newCoins,
+                    balance: newBalance,
+                    totalEarned: parseFloat(totalEarned.toFixed(2)),
+                    welcomeBonusClaimed: true
+                });
+                showToast(`🎉 Welcome! ${welcomeBonusCoins} coins added!`, 'success');
+                loadDashboard(uid);
+            }
+        }
+
+        async function loadDashboard(uid) {
+            const userRef = ref(db, 'users/' + uid);
+            try {
+                const snap = await get(userRef);
+                if (snap.exists()) {
+                    const d = snap.val();
+                    document.getElementById('welcome-name').innerText = `Hello, ${d.name || 'User'}`;
+                    document.getElementById('welcome-email').innerText = d.email || '';
+                    if (d.profile_pic) document.getElementById('dash-avatar').src = d.profile_pic;
+
+                    const coins = d.coins || 0;
+                    const balance = parseFloat((coins * coinValue).toFixed(2));
+                    document.getElementById('stat-earnings').innerHTML = `🪙 ${coins}<br><small>₹${balance.toFixed(2)}</small>`;
+                    document.getElementById('stat-tasks-done').innerText = d.completedTasks || 0;
+                    document.getElementById('stat-referrals').innerText = d.totalReferrals || 0;
+                    document.getElementById('stat-withdrawn').innerText = '₹' + (d.withdrawTotal || 0).toFixed(2);
+                }
+                // Load task preview
+                const tasksSnap = await get(ref(db, 'tasks'));
+                if (tasksSnap.exists()) {
+                    const tasks = tasksSnap.val();
+                    const firstKey = Object.keys(tasks)[0];
+                    if (firstKey) {
+                        const t = tasks[firstKey];
+                        document.getElementById('task-title').innerText = t.title || 'Complete a task';
+                        document.getElementById('task-desc').innerText = t.description || 'Earn rewards';
+                        const rewardCoins = t.reward || 2; // task reward in coins
+                        document.getElementById('task-reward').innerText = `+🪙 ${rewardCoins} (₹${(rewardCoins * coinValue).toFixed(2)})`;
+                    }
+                }
+                // Load latest announcement
+                const announceSnap = await get(query(ref(db, 'announcements'), limitToLast(1)));
+                if (announceSnap.exists()) {
+                    const val = announceSnap.val();
+                    const key = Object.keys(val)[0];
+                    document.getElementById('announce-text').innerText = val[key].text || 'Stay tuned!';
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Failed to load dashboard.', 'error');
+            }
+        }
+
+        // ──────────────────────────────────────
+        document.getElementById('withdraw-btn').addEventListener('click', async () => {
+            if (!currentUser) return showToast('Please log in.', 'error');
+
+            const amountInput = document.getElementById('withdraw-amount');
+            const method = document.getElementById('withdraw-method').value;
+            const amount = parseFloat(amountInput.value);
+
+            if (!amount || amount < minWithdraw || amount > maxWithdraw) {
+                return showToast(`Amount must be between ₹${minWithdraw} and ₹${maxWithdraw}.`, 'error');
+            }
+
+            const userRef = ref(db, 'users/' + currentUser.uid);
+            const snap = await get(userRef);
+            if (!snap.exists()) return showToast('User data not found.', 'error');
+            const userData = snap.val();
+            const coins = userData.coins || 0;
+            const balance = parseFloat((coins * coinValue).toFixed(2));
+
+            if (amount > balance) return showToast('Insufficient balance.', 'error');
+
+            // Daily limit check
+            const today = new Date().toISOString().slice(0, 10);
+            const withdrawalsRef = ref(db, 'withdrawals');
+            const wSnap = await get(withdrawalsRef);
+            let todayCount = 0;
+            if (wSnap.exists()) {
+                const list = wSnap.val();
+                for (let key in list) {
+                    const w = list[key];
+                    if (w.uid === currentUser.uid && w.status === 'pending') {
+                        const wDate = new Date(w.timestamp).toISOString().slice(0, 10);
+                        if (wDate === today) todayCount++;
+                    }
+                }
+            }
+            if (todayCount >= dailyLimit) {
+                return showToast(`Daily limit (${dailyLimit}) reached. Try tomorrow.`, 'error');
+            }
+
+            const btn = document.getElementById('withdraw-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            try {
+                // Convert amount to coins (ceil to avoid fractional loss)
+                const coinsToDeduct = Math.ceil(amount / coinValue);
+                const newCoins = coins - coinsToDeduct;
+                const newBalance = parseFloat((newCoins * coinValue).toFixed(2));
+                const newWithdrawn = (userData.withdrawTotal || 0) + amount;
+
+                // Push withdrawal record
+                const wRef = push(ref(db, 'withdrawals'));
+                await update(wRef, {
+                    amount: amount,
+                    coinsDeducted: coinsToDeduct,
+                    method: method,
+                    status: 'pending',
+                    timestamp: Date.now(),
+                    uid: currentUser.uid
+                });
+
+                // Update user data
+                await update(userRef, {
+                    coins: newCoins,
+                    balance: newBalance,
+                    withdrawTotal: parseFloat(newWithdrawn.toFixed(2))
+                });
+
+                amountInput.value = '';
+                showToast(`₹${amount} withdrawal submitted!`, 'success');
+                loadDashboard(currentUser.uid);
+            } catch (err) {
+                console.error(err);
+                showToast('Withdrawal failed. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Request Withdrawal';
+            }
+        });
+
+        document.getElementById('bell-btn').addEventListener('click', () => showToast('No new notifications.', ''));
+        document.getElementById('announce-card').addEventListener('click', () => showToast('Announcement details coming soon.', ''));
+
+        function showToast(msg, type) {
+            const old = document.querySelector('.toast');
+            if (old) old.remove();
+            const t = document.createElement('div');
+            t.className = 'toast ' + (type || '');
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
+    </script>
+</body>
+</html>
