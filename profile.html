@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>यूज़र प्रोफ़ाइल - लाइव</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body { 
+            background-color: #f4f6f9; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            color: #2c3e50;
+        }
+        
+        /* --- नया मोबाइल एडजस्टेड ऐप बार --- */
+        .navbar { 
+            background-color: #2c3e50; 
+            color: white; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px 16px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar .logo { 
+            font-size: 16px; 
+            font-weight: 700; 
+            letter-spacing: 0.5px;
+        }
+        
+        .nav-links { 
+            list-style: none; 
+            display: flex; 
+            gap: 16px; /* मोबाइल पर उंगली से टैप करने के लिए सही गैप */
+        }
+        
+        .nav-links a { 
+            color: #b8c2cc; 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: 500;
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            transition: color 0.2s ease;
+        }
+        
+        .nav-links a.active, .nav-links a:hover { 
+            color: #ffffff; 
+        }
+
+        /* मुख्य प्रोफ़ाइल कंटेनर (स्क्रीन एडजस्टेड) */
+        .main-container { 
+            padding: 12px; 
+            max-width: 480px; 
+            width: 100%; 
+            margin: 0 auto; 
+        }
+        
+        .profile-card { 
+            background: white; 
+            padding: 20px 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            text-align: center; 
+            margin-bottom: 12px;
+        }
+        
+        .profile-img-container { 
+            position: relative; 
+            width: 85px; 
+            height: 85px; 
+            margin: 0 auto 12px; 
+        }
+        
+        .profile-img { 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 3px solid #3498db; 
+        }
+        
+        /* यूज़र डिटेल्स फॉर्म */
+        .profile-info { 
+            margin-bottom: 15px; 
+            text-align: left; 
+            background: #f8f9fa; 
+            padding: 12px; 
+            border-radius: 10px; 
+        }
+        
+        .info-group { margin-bottom: 10px; }
+        .info-group:last-child { margin-bottom: 0; }
+        .info-group label { 
+            display: block; 
+            font-size: 11px; 
+            color: #7f8c8d; 
+            font-weight: bold; 
+            margin-bottom: 3px; 
+        }
+        
+        .profile-input { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #bdc3c7; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            color: #2c3e50; 
+            background: #fff; 
+            outline: none;
+        }
+        
+        .profile-input:disabled { 
+            background: transparent; 
+            border-color: transparent; 
+            padding-left: 0; 
+            font-weight: 500;
+        }
+        
+        .btn-container { display: flex; gap: 10px; }
+        .action-btn { 
+            flex: 1; padding: 12px; border-radius: 6px; cursor: pointer; 
+            font-size: 14px; font-weight: bold; border: none; 
+            display: flex; align-items: center; justify-content: center; gap: 6px; 
+        }
+        .edit-btn { background-color: #3498db; color: white; }
+        .save-btn { background-color: #2ecc71; color: white; display: none; }
+
+        /* Referral and Share Grid */
+        .grid-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid #e8edf2;
+        }
+
+        .stat-box i { font-size: 20px; margin-bottom: 5px; color: #e67e22; }
+        .stat-box.blue-icon i { color: #3498db; }
+        .stat-box.green-icon i { color: #2ecc71; }
+        
+        .stat-box p { font-size: 12px; color: #7f8c8d; font-weight: 500; }
+        .stat-box span { display: block; font-size: 16px; font-weight: bold; margin-top: 3px; color: #2c3e50; }
+
+        /* वर्टिकल नेविगेशन लिस्ट */
+        .menu-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #e8edf2;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 15px;
+            text-decoration: none;
+            color: #2c3e50;
+            border-bottom: 1px solid #f1f2f6;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:active { background-color: #f8f9fa; }
+
+        .menu-left { display: flex; align-items: center; gap: 10px; }
+        .menu-left i { font-size: 16px; width: 20px; text-align: center; }
+        .color-withdraw { color: #e74c3c; }
+        .color-tasks { color: #9b59b6; }
+        .color-history { color: #1abc9c; }
+
+        .menu-item .fa-chevron-right { font-size: 12px; color: #bdc3c7; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">MyDashboard</div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class="fas fa-home"></i> डैशबोर्ड</a></li>
+            <li><a href="profile.html" class="active"><i class="fas fa-user"></i> प्रोफ़ाइल</a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i> सेटिंग्स</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-container">
+        
+        <div class="profile-card">
+            <div class="profile-img-container">
+                <img id="user-pic" src="https://via.placeholder.com/150" alt="User Photo" class="profile-img">
+            </div>
+            
+            <div class="profile-info">
+                <div class="info-group">
+                    <label>पूरा नाम</label>
+                    <input type="text" id="user-name" class="profile-input" value="लोड हो रहा है..." disabled>
+                </div>
+                <div class="info-group">
+                    <label>ईमेल एड्रेस</label>
+                    <input type="email" id="user-email" class="profile-input" value="लोड हो रहा है..." disabled>
+                </div>
+                <div class="info-group">
+                    <label>मोबाइल नंबर</label>
+                    <input type="text" id="user-phone" class="profile-input" value="लोड हो रहा है..." disabled>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button id="edit-btn" class="action-btn edit-btn" onclick="enableEditing()"><i class="fas fa-edit"></i> एडिट करें</button>
+                <button id="save-btn" class="action-btn save-btn" onclick="saveProfile()"><i class="fas fa-save"></i> सुरक्षित करें</button>
+            </div>
+        </div>
+
+        <div class="grid-section">
+            <div class="stat-box blue-icon">
+                <i class="fas fa-users"></i>
+                <p>Total Referral</p>
+                <span id="total-referrals">0</span>
+            </div>
+            <a href="refer.html" class="stat-box green-icon">
+                <i class="fas fa-gift"></i>
+                <p>Refer & Earn</p>
+                <span style="font-size: 11px; color:#2ecc71; font-weight:normal;">Invite Friends <i class="fas fa-arrow-right"></i></span>
+            </a>
+        </div>
+
+        <div class="menu-list">
+            <a href="dashboard.html#withdraw" class="menu-item">
+                <div class="menu-left">
+                    <i class="fas fa-wallet color-withdraw"></i>
+                    <span>Withdraw Money</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+
+            <a href="completedTasks.html" class="menu-item">
+                <div class="menu-left">
+                    <i class="fas fa-tasks color-tasks"></i>
+                    <span>Completed Tasks History</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+
+            <a href="Withdrawalshistory.html" class="menu-item">
+                <div class="menu-left">
+                    <i class="fas fa-history color-history"></i>
+                    <span>Withdrawals History</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+const firebaseConfig = {apiKey: "AIzaSyDYdTJdXbxZ4bUGW-wO1BRaszEUb2Q_BAg",authDomain: "shivearnapp.firebaseapp.com",databaseURL: "https://shivearnapp-default-rtdb.asia-southeast1.firebasedatabase.app
+(opens in new tab)
+",projectId: "shivearnapp",storageBucket: "shivearnapp.firebasestorage.app",messagingSenderId: "467728812929",appId: "1:467728812929:web:a73f12827309d9c09d7680"};
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let currentUserId = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                fetchUserProfile(currentUserId);
+            } else {
+                alert("कृपया पहले लॉगिन करें!");
+                window.location.href = "login.html";
+            }
+        });
+
+        function fetchUserProfile(uid) {
+            const userRef = ref(db, 'users/' + uid);
+            get(userRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('user-name').value = data.name || '';
+                    document.getElementById('user-email').value = data.email || '';
+                    document.getElementById('user-phone').value = data.phone || '';
+                    document.getElementById('total-referrals').innerText = data.total_referrals || '0';
+                    if(data.profile_pic) {
+                        document.getElementById('user-pic').src = data.profile_pic;
+                    }
+                }
+            }).catch((error) => {
+                console.error("Data fetch error:", error);
+            });
+        }
+
+        window.saveProfile = function() {
+            if (!currentUserId) return;
+
+            const updatedData = {
+                name: document.getElementById('user-name').value,
+                phone: document.getElementById('user-phone').value
+            };
+
+            const userRef = ref(db, 'users/' + currentUserId);
+            update(userRef, updatedData).then(() => {
+                alert("प्रोफ़ाइल अपडेट हो गई!");
+                disableEditing();
+            }).catch((error) => {
+                alert("Error: " + error.message);
+            });
+        }
+    </script>
+
+    <script>
+        function enableEditing() {
+            const nameInput = document.getElementById('user-name');
+            const phoneInput = document.getElementById('user-phone');
+            nameInput.disabled = false;
+            phoneInput.disabled = false;
+            nameInput.style.paddingLeft = '10px';
+            phoneInput.style.paddingLeft = '10px';
+            document.getElementById('edit-btn').style.display = 'none';
+            document.getElementById('save-btn').style.display = 'flex';
+        }
+
+        function disableEditing() {
+            const nameInput = document.getElementById('user-name');
+            const phoneInput = document.getElementById('user-phone');
+            nameInput.disabled = true;
+            phoneInput.disabled = true;
+            nameInput.style.paddingLeft = '0';
+            phoneInput.style.paddingLeft = '0';
+            document.getElementById('edit-btn').style.display = 'flex';
+            document.getElementById('save-btn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
