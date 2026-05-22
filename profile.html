@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>User Profile - Shivearnapp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0b0e14;
+            --bg-card: #131926;
+            --bg-input: #0b0e14;
+            --border: #1f2a3f;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-purple: #a855f7;
+            --accent-blue: #3b82f6;
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+            --accent-yellow: #f1c40f;
+            --accent-cyan: #06b6d4;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding-bottom: 90px;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Navbar ─────────────────────── */
+        .navbar {
+            background-color: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+        .navbar .logo {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--accent-purple);
+            text-decoration: none;
+            letter-spacing: -0.3px;
+        }
+        .navbar .bell-btn {
+            color: var(--accent-yellow);
+            font-size: 19px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        .navbar .bell-btn:hover {
+            color: #f7dc6f;
+        }
+        .bell-dot {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 9px;
+            height: 9px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            border: 1.5px solid var(--bg-card);
+            display: none;
+        }
+        .bell-dot.active {
+            display: block;
+        }
+
+        /* ── Container ──────────────────── */
+        .container {
+            padding: 16px 14px;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* ── Upper Grid ────────────────── */
+        .upper-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .panel-box {
+            background: var(--bg-card);
+            padding: 20px 12px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        .panel-box:active {
+            transform: scale(0.97);
+        }
+        .avatar-container {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            margin-bottom: 10px;
+        }
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-purple);
+            background: #1e293b;
+        }
+        .avatar-edit-icon {
+            position: absolute;
+            bottom: 0;
+            right: -2px;
+            background: var(--accent-blue);
+            color: #fff;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            border: 2px solid var(--bg-card);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .avatar-edit-icon:hover {
+            background: #2563eb;
+        }
+        .display-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+        .user-id-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Earnings Box ──────────────── */
+        .earnings-box i {
+            font-size: 28px;
+            color: var(--accent-yellow);
+            margin-bottom: 6px;
+        }
+        .earnings-box .earn-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .earnings-box .earn-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-top: 4px;
+        }
+
+        /* ── Announcements Card ────────── */
+        .announcement-card {
+            background: linear-gradient(135deg, #1a1030, #1e1a2e);
+            border: 1px solid #2d234a;
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .announcement-card:active {
+            transform: scale(0.98);
+        }
+        .announcement-card .announce-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: rgba(168, 85, 247, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-purple);
+            font-size: 17px;
+        }
+        .announce-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .announce-content .announce-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 2px;
+        }
+        .announce-content .announce-text {
+            font-size: 11px;
+            color: #a5b4fc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .announcement-card .fa-chevron-right {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        .announce-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-red);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+        .announce-dismiss {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px;
+            z-index: 2;
+            transition: var(--transition);
+        }
+        .announce-dismiss:hover {
+            color: #fff;
+        }
+
+        /* ── Details Card Form ─────────── */
+        .details-card {
+            background: var(--bg-card);
+            padding: 18px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+        }
+        .details-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .details-card .card-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .details-card .card-header h3 i {
+            color: var(--accent-blue);
+            font-size: 14px;
+        }
+        .edit-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .edit-toggle:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        .edit-toggle.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 13px;
+        }
+        .form-group:last-of-type {
+            margin-bottom: 0;
+        }
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: #fff;
+            background: var(--bg-input);
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .form-input:disabled {
+            background: transparent;
+            border-color: transparent;
+            padding-left: 0;
+            color: #cbd5e1;
+            opacity: 0.85;
+            cursor: default;
+        }
+        .form-input:disabled:focus {
+            box-shadow: none;
+            border-color: transparent;
+        }
+
+        .btn-stack {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .control-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: var(--transition);
+            letter-spacing: 0.2px;
+        }
+        .control-btn:active {
+            transform: scale(0.96);
+        }
+        .btn-save {
+            background-color: var(--accent-green);
+            color: #fff;
+            display: none;
+        }
+        .btn-save:hover {
+            background-color: #27ae60;
+        }
+        .btn-save:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        /* ── Referral Grid ─────────────── */
+        .refer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .ref-box {
+            background: var(--bg-card);
+            padding: 16px 12px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .ref-box:active {
+            transform: scale(0.97);
+        }
+        .ref-box i {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        .ref-box.total-ref i {
+            color: var(--accent-blue);
+        }
+        .ref-box.earn-ref i {
+            color: var(--accent-green);
+        }
+        .ref-box p {
+            font-size: 11px;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+        }
+        .ref-box span {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 3px;
+        }
+        .ref-box.earn-ref span {
+            font-size: 11px;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* ── Link List ─────────────────── */
+        .link-list {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 16px;
+            text-decoration: none;
+            color: #e2e8f0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .link-item:last-child {
+            border-bottom: none;
+        }
+        .link-item:active {
+            background-color: #1a2236;
+        }
+        .link-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+        .link-left i {
+            font-size: 17px;
+            width: 22px;
+            text-align: center;
+        }
+        .c-withdraw {
+            color: var(--accent-red);
+        }
+        .c-tasks {
+            color: var(--accent-purple);
+        }
+        .c-history {
+            color: var(--accent-cyan);
+        }
+        .c-logout {
+            color: #f87171;
+        }
+        .link-item .fa-chevron-right {
+            font-size: 12px;
+            color: #475569;
+        }
+
+        /* ── Bottom Navigation ─────────── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-card);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0 12px;
+            border-top: 1px solid var(--border);
+            z-index: 1000;
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 500;
+            gap: 4px;
+            transition: var(--transition);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        .bottom-nav-item i {
+            font-size: 18px;
+        }
+        .bottom-nav-item.active {
+            color: var(--accent-blue);
+        }
+        .bottom-nav-item:active {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        /* ── Toast ─────────────────────── */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            animation: toastIn 0.35s ease, toastOut 0.35s ease 2s forwards;
+            pointer-events: none;
+        }
+        .toast.success {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        .toast.error {
+            border-color: var(--accent-red);
+            color: #f87171;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px);
+            }
+        }
+
+        /* ── Skeleton Loading ──────────── */
+        .skeleton {
+            background: linear-gradient(90deg, #1e293b 25%, #253349 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ── Responsive ────────────────── */
+        @media (min-width: 500px) {
+            .container {
+                padding: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar">
+        <a href="dashboard.html" class="logo">Shivearnapp</a>
+        <div style="position:relative;">
+            <i class="fas fa-bell bell-btn" id="bell-icon" title="Notifications">
+                <span class="bell-dot" id="bell-dot"></span>
+            </i>
+        </div>
+    </nav>
+
+    <!-- ═══════════════ MAIN ═══════════════ -->
+    <main class="container">
+
+        <!-- ── Upper Grid: Avatar + Earnings ── -->
+        <div class="upper-grid">
+            <!-- Profile Avatar Panel -->
+            <div class="panel-box">
+                <div class="avatar-container">
+                    <img id="user-avatar"
+                    src="https://via.placeholder.com/150/1e293b/94a3b8?text=User"
+                    alt="Avatar"
+                    class="avatar-img"
+                    loading="lazy">
+                    <div class="avatar-edit-icon" id="avatar-edit-trigger" title="Change Photo">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <div id="panel-name" class="display-name">Loading...</div>
+                <div id="panel-uid" class="user-id-label"></div>
+            </div>
+
+            <!-- Total Earnings Panel -->
+            <div class="panel-box earnings-box">
+                <i class="fas fa-wallet"></i>
+                <span class="earn-label">Total Earnings</span>
+                <span id="profile-total-earnings" class="earn-amount">₹0.00</span>
+            </div>
+        </div>
+
+        <!-- ── Announcements Section ── -->
+        <div class="announcement-card" id="announcement-card">
+            <span class="announce-badge" id="announce-badge">NEW</span>
+            <button class="announce-dismiss" id="announce-dismiss-btn" title="Dismiss">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="announce-icon">
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            <div class="announce-content">
+                <div class="announce-title" id="announce-title">Welcome to Shivearnapp!</div>
+                <div class="announce-text" id="announce-text">Complete tasks & start earning today.</div>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+        </div>
+
+        <!-- ── Profile Details Card ── -->
+        <div class="details-card">
+            <div class="card-header">
+                <h3><i class="fas fa-id-card"></i> Personal Information</h3>
+                <button class="edit-toggle" id="edit-toggle-btn" onclick="toggleEditMode()">
+                    <i class="fas fa-pen"></i> Edit
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="p-name" class="form-input" placeholder="Enter your full name" disabled>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="p-email" class="form-input" placeholder="Enter your email" disabled>
+            </div>
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="tel" id="p-phone" class="form-input" placeholder="Enter your mobile number" disabled>
+            </div>
+
+            <div class="btn-stack">
+                <button id="p-save-btn" class="control-btn btn-save" onclick="commitProfile()">
+                    <i class="fas fa-check-circle"></i> Save Changes
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Referral Grid ── -->
+        <div class="refer-grid">
+            <div class="ref-box total-ref">
+                <i class="fas fa-users"></i>
+                <p>Total Referrals</p>
+                <span id="p-total-ref">0</span>
+            </div>
+            <a href="refer.html" class="ref-box earn-ref">
+                <i class="fas fa-gift"></i>
+                <p>Refer & Earn</p>
+                <span>Invite Friends →</span>
+            </a>
+        </div>
+
+        <!-- ── Navigation Links ── -->
+        <div class="link-list">
+            <a href="dashboard.html#withdraw" class="link-item">
+                <div class="link-left">
+                    <i class="fas fa-money-check-alt c-withdraw"></i>
+                    <span>Withdraw Money</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+
+            <a href="completedTasks.html" class="link-item">
+                <div class="link-left">
+                    <i class="fas fa-history c-tasks"></i>
+                    <span>Completed Tasks History</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+
+            <a href="Withdrawalshistory.html" class="link-item">
+                <div class="link-left">
+                    <i class="fas fa-receipt c-history"></i>
+                    <span>Withdrawals History</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+
+            <a href="#" class="link-item" id="logout-btn">
+                <div class="link-left">
+                    <i class="fas fa-sign-out-alt c-logout"></i>
+                    <span>Log Out</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- ═══════════════ BOTTOM NAV ═══════════════ -->
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="tasks.html" class="bottom-nav-item"><i class="fas fa-clipboard-list"></i><span>Tasks</span></a>
+        <a href="dashboard.html#withdraw" class="bottom-nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <a href="completedTasks.html" class="bottom-nav-item"><i class="fas fa-history"></i><span>History</span></a>
+        <a href="profile.html" class="bottom-nav-item active"><i class="fas fa-user"></i><span>Profile</span></a>
+    </div>
+
+    <!-- ═══════════════ SCRIPTS ═══════════════ -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // ── Firebase Config ─────────────────
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYdTJdXbxZ4bUGW-wO1BRaszEUb2Q_BAg",
+            authDomain: "shivearnapp.firebaseapp.com",
+            databaseURL: "https://shivearnapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "shivearnapp",
+            storageBucket: "shivearnapp.firebasestorage.app",
+            messagingSenderId: "467728812929",
+            appId: "1:467728812929:web:a73f12827309d9c09d7680"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let activeUid = null;
+        let originalData = {};
+        let isEditMode = false;
+
+        // ── Auth State Listener ────────────
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                activeUid = user.uid;
+                document.getElementById('panel-uid').innerText = 'ID: ' + user.uid.slice(0, 10) + '...';
+                syncProfileData(activeUid);
+            } else {
+                // 🔒 Security: Redirect to login if not authenticated
+                window.location.href = "login.html";
+            }
+        });
+
+        // ── Sync Profile Data from Firebase ─
+        function syncProfileData(uid) {
+            const nodeRef = ref(db, 'users/' + uid);
+            get(nodeRef)
+            .then((snap) => {
+                if (snap.exists()) {
+                    const profile = snap.val();
+                    originalData = {
+                        name: profile.name || '',
+                        email: profile.email || '',
+                        phone: profile.phone || '',
+                    };
+
+                    document.getElementById('p-name').value = originalData.name;
+                    document.getElementById('panel-name').innerText = originalData.name || 'User';
+                    document.getElementById('p-email').value = originalData.email;
+                    document.getElementById('p-phone').value = originalData.phone;
+                    document.getElementById('p-total-ref').innerText = profile.total_referrals || '0';
+
+                    if (profile.total_earnings !== undefined) {
+                        document.getElementById('profile-total-earnings').innerText =
+                            '₹' + parseFloat(profile.total_earnings).toFixed(2);
+                    }
+                    if (profile.profile_pic && profile.profile_pic.trim() !== '') {
+                        document.getElementById('user-avatar').src = profile.profile_pic;
+                    }
+                } else {
+                    // User node doesn't exist yet
+                    document.getElementById('panel-name').innerText = 'New User';
+                    document.getElementById('p-name').value = '';
+                    document.getElementById('p-email').value = '';
+                    document.getElementById('p-phone').value = '';
+                    showToast('Please complete your profile.', '');
+                }
+            })
+            .catch((err) => {
+                console.error('Profile fetch error:', err);
+                showToast('Failed to load profile data.', 'error');
+            });
+        }
+
+        // ── Toggle Edit Mode ───────────────
+        window.toggleEditMode = function () {
+            isEditMode = !isEditMode;
+            const nameInput = document.getElementById('p-name');
+            const emailInput = document.getElementById('p-email');
+            const phoneInput = document.getElementById('p-phone');
+            const saveBtn = document.getElementById('p-save-btn');
+            const editToggleBtn = document.getElementById('edit-toggle-btn');
+
+            if (isEditMode) {
+                // Enable all fields
+                nameInput.disabled = false;
+                emailInput.disabled = false;
+                phoneInput.disabled = false;
+                nameInput.focus();
+                saveBtn.style.display = 'flex';
+                editToggleBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+                editToggleBtn.classList.add('active');
+            } else {
+                // Disable fields & restore original
+                hideEditMode();
+            }
+        };
+
+        function hideEditMode() {
+            isEditMode = false;
+            document.getElementById('p-name').disabled = true;
+            document.getElementById('p-email').disabled = true;
+            document.getElementById('p-phone').disabled = true;
+            document.getElementById('p-save-btn').style.display = 'none';
+            const editToggleBtn = document.getElementById('edit-toggle-btn');
+            editToggleBtn.innerHTML = '<i class="fas fa-pen"></i> Edit';
+            editToggleBtn.classList.remove('active');
+
+            // Restore original values if user cancelled
+            if (originalData.name !== undefined) {
+                document.getElementById('p-name').value = originalData.name;
+                document.getElementById('p-email').value = originalData.email;
+                document.getElementById('p-phone').value = originalData.phone;
+            }
+        }
+        window.hideEditMode = hideEditMode;
+
+        // ── Save Profile ───────────────────
+        window.commitProfile = function () {
+            if (!activeUid) {
+                showToast('Please log in first.', 'error');
+                return;
+            }
+
+            const nameVal = document.getElementById('p-name').value.trim();
+            const emailVal = document.getElementById('p-email').value.trim();
+            const phoneVal = document.getElementById('p-phone').value.trim();
+
+            // Basic validation
+            if (!nameVal) {
+                showToast('Name cannot be empty.', 'error');
+                document.getElementById('p-name').focus();
+                return;
+            }
+            if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+                showToast('Please enter a valid email address.', 'error');
+                document.getElementById('p-email').focus();
+                return;
+            }
+            if (phoneVal && !/^[0-9+\-\s]{7,15}$/.test(phoneVal)) {
+                showToast('Please enter a valid phone number.', 'error');
+                document.getElementById('p-phone').focus();
+                return;
+            }
+
+            const saveBtn = document.getElementById('p-save-btn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            const updates = {
+                name: nameVal,
+                email: emailVal,
+                phone: phoneVal,
+            };
+
+            update(ref(db, 'users/' + activeUid), updates)
+            .then(() => {
+                originalData = { ...updates };
+                document.getElementById('panel-name').innerText = nameVal;
+                hideEditMode();
+                showToast('Profile saved successfully!', 'success');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-check-circle"></i> Save Changes';
+            })
+            .catch((err) => {
+                console.error('Profile update error:', err);
+                showToast('Failed to save. Try again.', 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-check-circle"></i> Save Changes';
+            });
+        };
+
+        // ── Logout ─────────────────────────
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Are you sure you want to log out?')) {
+                signOut(auth)
+                .then(() => {
+                    window.location.href = "login.html";
+                })
+                .catch((err) => {
+                    console.error('Logout error:', err);
+                    showToast('Logout failed.', 'error');
+                });
+            }
+        });
+
+        // ── Avatar Edit (placeholder) ──────
+        document.getElementById('avatar-edit-trigger').addEventListener('click', () => {
+            showToast('Photo upload coming soon!', '');
+        });
+
+        // ── Announcement Dismiss ───────────
+        document.getElementById('announce-dismiss-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const card = document.getElementById('announcement-card');
+            card.style.transition = 'opacity 0.3s ease, max-height 0.3s ease';
+            card.style.opacity = '0';
+            card.style.maxHeight = '0';
+            card.style.padding = '0';
+            card.style.margin = '0';
+            card.style.border = 'none';
+            card.style.overflow = 'hidden';
+            setTimeout(() => {
+                card.style.display = 'none';
+            }, 300);
+            // Save dismissal to localStorage
+            localStorage.setItem('announce_dismissed', 'true');
+        });
+
+        // Check if announcement was previously dismissed
+        if (localStorage.getItem('announce_dismissed') === 'true') {
+            const card = document.getElementById('announcement-card');
+            card.style.display = 'none';
+        }
+
+        // ── Bell Icon Click ────────────────
+        document.getElementById('bell-icon').addEventListener('click', () => {
+            showToast('No new notifications.', '');
+            document.getElementById('bell-dot').classList.remove('active');
+        });
+
+        // ── Announcement Card Click ────────
+        document.getElementById('announcement-card').addEventListener('click', function (e) {
+            if (e.target.closest('.announce-dismiss')) return;
+            showToast('Opening announcement details...', 'success');
+        });
+
+        // ── Toast Helper ───────────────────
+        function showToast(message, type) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + (type || '');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2400);
+        }
+
+        // Expose to global scope
+        window.showToast = showToast;
+    </script>
+</body>
+</html>
