@@ -1,0 +1,136 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  background:linear-gradient(135deg,#0f172a,#1e293b,#111827);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.container{
+  width:100%;
+  max-width:400px;
+}
+
+.card{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(15px);
+  border-radius:30px;
+  padding:30px 22px;
+  text-align:center;
+  box-shadow:0 10px 40px rgba(0,0,0,0.3);
+}
+
+.logo-box{
+  animation:pulse 2s infinite;
+}
+
+.logo{
+  width:95px;
+  height:95px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 15px rgba(16,185,129,.4));
+}
+
+.app-name{
+  margin-top:15px;
+  font-size:2rem;
+  font-weight:800;
+  background:linear-gradient(to right,#10b981,#3b82f6);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.tagline{
+  color:#fff;
+  font-size:1rem;
+  font-weight:600;
+  margin-top:10px;
+}
+
+.sub-text{
+  color:#94a3b8;
+  margin-top:8px;
+  font-size:.9rem;
+}
+
+.progress-box{
+  margin-top:25px;
+  width:100%;
+  height:10px;
+  background:rgba(255,255,255,.08);
+  border-radius:50px;
+  overflow:hidden;
+}
+
+.progress-bar{
+  width:0%;
+  height:100%;
+  background:linear-gradient(to right,#10b981,#3b82f6);
+  border-radius:50px;
+  transition:0.3s;
+}
+
+.loading-text{
+  margin-top:10px;
+  color:#cbd5e1;
+  font-size:.9rem;
+}
+
+.trust-box{
+  margin-top:22px;
+  background:rgba(255,255,255,.05);
+  padding:14px;
+  border-radius:18px;
+  color:#e2e8f0;
+  font-size:.85rem;
+  line-height:1.7;
+}
+
+.support-box{
+  margin-top:20px;
+  background:rgba(255,255,255,.04);
+  border-radius:20px;
+  padding:18px;
+}
+
+.support-title{
+  color:#fff;
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+.support-text{
+  color:#94a3b8;
+  font-size:.85rem;
+  margin-bottom:12px;
+}
+
+.contact{
+  color:#38bdf8;
+  font-size:.85rem;
+  margin-top:8px;
+}
+
+.version{
+  margin-top:18px;
+  color:#64748b;
+  font-size:.75rem;
+}
+
+@keyframes pulse{
+  0%,100%{
+    transform:scale(1);
+  }
+  50%{
+    transform:scale(1.06);
+  }
+}
