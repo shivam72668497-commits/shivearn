@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#0a0a14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ShivEarn — Dashboard</title>
+
+    <!-- Firebase SDKs (compat for existing setup compatibility) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js">
+    </script>
+
+    <!-- Existing Firebase Config -->
+    <script src="js/firebase/firebase-config.js">
+    </script>
+
+    <style>
+        :root {
+            --bg-deep: #0a0a14;
+            --bg-primary: #0e0e1a;
+            --bg-secondary: #121220;
+            --bg-card: #181828;
+            --bg-card-elevated: #1c1c30;
+            --bg-card-glass: rgba(24, 24, 40, 0.85);
+            --bg-input: #1a1a2c;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-card: rgba(255, 255, 255, 0.08);
+            --border-accent: rgba(232, 184, 85, 0.3);
+            --accent-gold: #e8b855;
+            --accent-gold-light: #f0cc70;
+            --accent-gold-dark: #c49a35;
+            --accent-blue: #5b8def;
+            --accent-purple: #8b6cf6;
+            --accent-green: #4caf84;
+            --accent-green-light: #5ecb98;
+            --accent-rose: #e8607a;
+            --text-primary: #f0f0f6;
+            --text-secondary: #b0b0c0;
+            --text-muted: #74748a;
+            --text-on-accent: #1a1a14;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.45);
+            --shadow-gold: 0 4px 24px rgba(232, 184, 85, 0.12);
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            scroll-behavior: smooth;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+            background-image:
+                radial-gradient(ellipse at 50% 0%, rgba(139, 108, 246, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(232, 184, 85, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 60%, rgba(91, 141, 239, 0.03) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* App Container */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: transparent;
+        }
+
+        @media (min-width: 481px) {
+            .app-container {
+                border-left: 1px solid var(--border-subtle);
+                border-right: 1px solid var(--border-subtle);
+                box-shadow: var(--shadow-lg);
+            }
+            body {
+                padding: 0;
+            }
+        }
+
+        /* Scrollable Main Content */
+        .main-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0 16px 100px 16px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .main-scroll::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        /* ========== HEADER ========== */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 4px 8px 4px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: transparent;
+            backdrop-filter: blur(0px);
+            transition: var(--transition-smooth);
+        }
+        .dashboard-header.scrolled {
+            background: rgba(10, 10, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            margin: 0 -16px;
+            padding: 12px 20px 10px 20px;
+            border-radius: 0;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .app-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #1e1e38, #252545);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--accent-gold);
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+            border: 1px solid var(--border-card);
+            box-shadow: var(--shadow-sm);
+        }
+        .app-name {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .btn-notification {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        .btn-notification:active {
+            transform: scale(0.94);
+            background: var(--bg-card-elevated);
+        }
+        .btn-notification .badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--accent-rose);
+            border: 2px solid var(--bg-card);
+            animation: pulse-badge 2s infinite;
+        }
+        @keyframes pulse-badge {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(232, 96, 122, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(232, 96, 122, 0);
+            }
+        }
+        .btn-profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            background: var(--bg-card);
+            border: 2px solid var(--border-card);
+            cursor: pointer;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-profile-avatar:active {
+            transform: scale(0.94);
+            border-color: var(--accent-gold);
+        }
+        .btn-profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .avatar-placeholder {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--accent-gold);
+            letter-spacing: -0.5px;
+        }
+
+        /* ========== GREETING ========== */
+        .greeting-section {
+            padding: 4px 4px 16px 4px;
+        }
+        .greeting-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        .greeting-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.4px;
+            line-height: 1.2;
+        }
+
+        /* ========== WALLET CARD ========== */
+        .wallet-card-wrapper {
+            padding: 0 0 16px 0;
+        }
+        .wallet-card {
+            background: linear-gradient(145deg, #1a1a32 0%, #1e1e3a 30%, #1a1a34 60%, #181830 100%);
+            border-radius: var(--radius-lg);
+            padding: 22px 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: var(--shadow-md), var(--shadow-gold);
+            transition: var(--transition-smooth);
+            cursor: default;
+        }
+        .wallet-card::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -30%;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(232, 184, 85, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .wallet-card::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            left: -10%;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 108, 246, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .wallet-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 14px;
+        }
+        .wallet-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .wallet-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            background: rgba(232, 184, 85, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-gold);
+        }
+        .wallet-balance {
+            font-size: 38px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -1px;
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+            font-family: var(--font-mono);
+        }
+        .wallet-balance .currency-symbol {
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--accent-gold-light);
+            margin-right: 2px;
+            font-family: var(--font-sans);
+        }
+        .wallet-sub-row {
+            display: flex;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .wallet-sub-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .wallet-sub-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .wallet-sub-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .wallet-sub-dot.coins {
+            background: var(--accent-gold);
+            box-shadow: 0 0 8px rgba(232, 184, 85, 0.5);
+        }
+        .wallet-sub-dot.today {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px rgba(76, 175, 132, 0.5);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                box-shadow: 0 0 6px rgba(76, 175, 132, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 14px rgba(76, 175, 132, 0.8);
+            }
+        }
+
+        /* ========== QUICK ACTIONS ========== */
+        .quick-actions-section {
+            padding: 0 0 16px 0;
+        }
+        .section-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .quick-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 10px;
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            text-align: center;
+            color: var(--text-secondary);
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 80px;
+        }
+        .quick-action-btn:active {
+            transform: scale(0.95);
+            background: var(--bg-card-elevated);
+            border-color: var(--border-accent);
+        }
+        .quick-action-btn .qa-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .qa-icon.tasks {
+            background: rgba(91, 141, 239, 0.15);
+            color: var(--accent-blue);
+        }
+        .qa-icon.daily {
+            background: rgba(232, 184, 85, 0.15);
+            color: var(--accent-gold);
+        }
+        .qa-icon.refer {
+            background: rgba(139, 108, 246, 0.15);
+            color: var(--accent-purple);
+        }
+        .qa-icon.withdraw {
+            background: rgba(76, 175, 132, 0.15);
+            color: var(--accent-green);
+        }
+        .qa-icon.history {
+            background: rgba(180, 180, 200, 0.12);
+            color: #b4b4c8;
+        }
+        .qa-icon.support {
+            background: rgba(232, 96, 122, 0.12);
+            color: var(--accent-rose);
+        }
+        .quick-action-btn .qa-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+        }
+
+        /* ========== FEATURED TASKS ========== */
+        .featured-tasks-section {
+            padding: 0 0 16px 0;
+        }
+        .task-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            margin-bottom: 8px;
+        }
+        .task-card:active {
+            background: var(--bg-card-elevated);
+            border-color: var(--border-accent);
+            transform: scale(0.985);
+        }
+        .task-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            background: rgba(91, 141, 239, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--accent-blue);
+        }
+        .task-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .task-card-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            letter-spacing: -0.2px;
+        }
+        .task-card-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .task-card-reward {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--accent-gold);
+            flex-shrink: 0;
+            letter-spacing: -0.3px;
+        }
+        .task-progress-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 2px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .task-progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            transition: width 0.6s ease;
+        }
+        .task-count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: var(--radius-full);
+            background: rgba(232, 184, 85, 0.18);
+            color: var(--accent-gold);
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== REFERRAL BANNER ========== */
+        .referral-banner {
+            background: linear-gradient(135deg, #1e1e38 0%, #221f3a 40%, #1f1e36 100%);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(139, 108, 246, 0.2);
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+        }
+        .referral-banner::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(139, 108, 246, 0.15);
+            pointer-events: none;
+        }
+        .referral-banner-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .referral-banner-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: rgba(139, 108, 246, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--accent-purple);
+        }
+        .referral-banner-text {
+            flex: 1;
+            min-width: 0;
+        }
+        .referral-banner-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #fff;
+            letter-spacing: -0.3px;
+            margin-bottom: 2px;
+        }
+        .referral-banner-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+        .referral-banner-amount {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--accent-gold);
+            letter-spacing: -0.4px;
+        }
+        .btn-copy-referral {
+            padding: 10px 18px;
+            border-radius: var(--radius-full);
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            letter-spacing: 0.2px;
+            transition: var(--transition-fast);
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+        }
+        .btn-copy-referral:active {
+            transform: scale(0.94);
+            opacity: 0.85;
+        }
+        .btn-copy-referral.copied {
+            background: var(--accent-green);
+        }
+
+        /* ========== USER STATS ========== */
+        .user-stats-section {
+            padding: 0 0 8px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            transition: var(--transition-fast);
+        }
+        .stat-card-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .stat-card-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 2px;
+        }
+        .stat-card-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+        .empty-state-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ========== SKELETON LOADING ========== */
+        .skeleton {
+            background: linear-gradient(90deg,
+                    var(--bg-card) 25%,
+                    rgba(255, 255, 255, 0.03) 50%,
+                    var(--bg-card) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.6s infinite;
+            border-radius: var(--radius-sm);
+            pointer-events: none;
+        }
+        @keyframes skeleton-shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+        .skeleton-text {
+            height: 14px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .skeleton-text.short {
+            width: 60%;
+        }
+        .skeleton-text.medium {
+            width: 80%;
+        }
+        .skeleton-card {
+            height: 140px;
+            border-radius: var(--radius-lg);
+        }
+        .skeleton-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .skeleton-balance {
+            height: 38px;
+            width: 140px;
+            border-radius: 6px;
+        }
+        .skeleton-btn {
+            height: 80px;
+            border-radius: var(--radius-md);
+        }
+
+        /* ========== BOTTOM NAVIGATION ========== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: rgba(14, 14, 26, 0.92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 8px 8px calc(8px + var(--safe-bottom)) 8px;
+            z-index: 100;
+            border-radius: 20px 20px 0 0;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 14px;
+            border-radius: var(--radius-full);
+            transition: var(--transition-fast);
+            color: var(--text-muted);
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            min-width: 56px;
+        }
+        .nav-item.active {
+            color: var(--accent-gold);
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            width: 24px;
+            height: 3px;
+            border-radius: 0 0 3px 3px;
+            background: var(--accent-gold);
+        }
+        .nav-item:active {
+            transform: scale(0.9);
+        }
+        .nav-icon {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+        }
+        .nav-item.active .nav-icon {
+            transform: translateY(-1px);
+        }
+
+        /* ========== TAB PANELS ========== */
+        .tab-panel {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== TOAST ========== */
+        .toast {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--bg-card-elevated);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-card);
+            box-shadow: var(--shadow-lg);
+            white-space: nowrap;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success {
+            border-color: rgba(76, 175, 132, 0.4);
+        }
+
+        /* Utility */
+        .text-gold {
+            color: var(--accent-gold);
+        }
+        .text-green {
+            color: var(--accent-green);
+        }
+        .text-muted {
+            color: var(--text-muted);
+        }
+        .hidden {
+            display: none !important;
+        }
+        .fade-in {
+            animation: fadeSlideIn 0.4s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="dashboard-header" id="dashboardHeader">
+            <div class="header-brand">
+                <div class="app-logo">SE</div>
+                <span class="app-name">ShivEarn</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-notification" id="btnNotification" aria-label="Notifications">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="badge hidden" id="notificationBadge"></span>
+                </button>
+                <button class="btn-profile-avatar" id="btnProfileAvatar" aria-label="Profile">
+                    <span class="avatar-placeholder" id="avatarPlaceholder">?</span>
+                    <img src="" alt="Profile" id="avatarImage" style="display:none;">
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Content -->
+        <div class="main-scroll" id="mainScroll">
+            <!-- ========== TAB: Dashboard ========== -->
+            <div class="tab-panel active" id="tab-dashboard">
+                <!-- Greeting -->
+                <div class="greeting-section">
+                    <p class="greeting-label" id="greetingLabel">Good Morning</p>
+                    <h1 class="greeting-name" id="greetingName">Welcome back</h1>
+                </div>
+
+                <!-- Wallet Card -->
+                <div class="wallet-card-wrapper" id="walletCardWrapper">
+                    <div class="wallet-card" id="walletCard">
+                        <div class="wallet-card-top">
+                            <span class="wallet-label">Your Balance</span>
+                            <div class="wallet-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                    <line x1="2" y1="10" x2="22" y2="10"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="wallet-balance">
+                            <span class="currency-symbol">₹</span><span id="walletBalanceDisplay">0.00</span>
+                        </div>
+                        <div class="wallet-sub-row">
+                            <div class="wallet-sub-item">
+                                <span class="wallet-sub-dot coins"></span>
+                                <span>Coins: </span>
+                                <span class="wallet-sub-value" id="totalCoinsDisplay">0</span>
+                            </div>
+                            <div class="wallet-sub-item">
+                                <span class="wallet-sub-dot today"></span>
+                                <span>Today: </span>
+                                <span class="wallet-sub-value" id="todayEarningsDisplay">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skeleton Wallet (hidden by default) -->
+                <div class="wallet-card-wrapper hidden" id="skeletonWallet">
+                    <div class="skeleton skeleton-card"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions-section">
+                    <p class="section-label">Quick Actions</p>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-btn" data-action="tasks">
+                            <div class="qa-icon tasks">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                                </svg>
+                            </div>
+                            <span class="qa-label">Tasks</span>
+                        </button>
+                        <button class="quick-action-btn" data-action="daily">
+                            <div class="qa-icon daily">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/>
+                                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                                </svg>
+                            </div>
+                            <span class="qa-label">Daily Reward</span>
+                        </button>
+                        <button class="quick-action-btn" data-action="refer">
+                            <div class="qa-icon refer">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/>
+                                    <polyline points="17 11 19 13 23 9"/>
+                                </svg>
+                            </div>
+                            <span class="qa-label">Refer & Earn</span>
+                        </button>
+                        <button class="quick-action-btn" data-action="withdraw">
+                            <div class="qa-icon withdraw">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                                </svg>
+                            </div>
+                            <span class="qa-label">Withdraw</span>
+                        </button>
+                        <button class="quick-action-btn" data-action="history">
+                            <div class="qa-icon history">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </div>
+                            <span class="qa-label">History</span>
+                        </button>
+                        <button class="quick-action-btn" data-action="support">
+                            <div class="qa-icon support">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <span class="qa-label">Support</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Featured Tasks -->
+                <div class="featured-tasks-section" id="featuredTasksSection">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding-left:4px;margin-bottom:12px;">
+                        <p class="section-label" style="margin-bottom:0;">Featured Tasks</p>
+                        <span class="task-count-badge" id="taskCountBadge">0</span>
+                    </div>
+                    <div id="featuredTasksList">
+                        <!-- Dynamically populated -->
+                    </div>
+                    <div class="empty-state hidden" id="tasksEmptyState">
+                        <div class="empty-state-icon">📋</div>
+                        <p class="empty-state-text">No tasks available right now.<br>Check back soon!</p>
+                    </div>
+                </div>
+
+                <!-- Referral Banner -->
+                <div class="referral-banner" id="referralBanner">
+                    <div class="referral-banner-content">
+                        <div class="referral-banner-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/>
+                                <line x1="23" y1="11" x2="17" y2="11"/>
+                            </svg>
+                        </div>
+                        <div class="referral-banner-text">
+                            <p class="referral-banner-title">Invite Friends & Earn</p>
+                            <p class="referral-banner-subtitle">Earn per referral</p>
+                            <p class="referral-banner-amount" id="referralEarningAmount">₹25.00</p>
+                        </div>
+                        <button class="btn-copy-referral" id="btnCopyReferral">Copy Link</button>
+                    </div>
+                </div>
+
+                <!-- User Stats -->
+                <div class="user-stats-section">
+                    <p class="section-label">Your Stats</p>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-icon" style="background:rgba(76,175,132,0.12);color:var(--accent-green);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            </div>
+                            <p class="stat-card-value" id="statTotalEarnings">₹0</p>
+                            <p class="stat-card-label">Total Earnings</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon" style="background:rgba(91,141,239,0.12);color:var(--accent-blue);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            </div>
+                            <p class="stat-card-value" id="statCompletedTasks">0</p>
+                            <p class="stat-card-label">Tasks Done</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon" style="background:rgba(139,108,246,0.12);color:var(--accent-purple);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                            </div>
+                            <p class="stat-card-value" id="statReferralCount">0</p>
+                            <p class="stat-card-label">Referrals</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon" style="background:rgba(232,184,85,0.12);color:var(--accent-gold);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <p class="stat-card-value" id="statWithdrawalStatus">—</p>
+                            <p class="stat-card-label">Withdrawal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== TAB: Tasks ========== -->
+            <div class="tab-panel" id="tab-tasks">
+                <div style="padding:12px 4px 20px 4px;">
+                    <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.4px;">All Tasks</h2>
+                    <p style="font-size:13px;color:var(--text-muted);margin-top:4px;">Complete tasks to earn rewards</p>
+                </div>
+                <div id="allTasksList"></div>
+                <div class="empty-state" id="allTasksEmpty">
+                    <div class="empty-state-icon">📋</div>
+                    <p class="empty-state-text">No tasks available</p>
+                </div>
+            </div>
+
+            <!-- ========== TAB: Wallet ========== -->
+            <div class="tab-panel" id="tab-wallet">
+                <div style="padding:12px 4px 20px 4px;">
+                    <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.4px;">Wallet</h2>
+                    <p style="font-size:13px;color:var(--text-muted);margin-top:4px;">Your earnings & transactions</p>
+                </div>
+                <div class="wallet-card" style="margin-bottom:16px;">
+                    <div class="wallet-card-top"><span class="wallet-label">Available Balance</span></div>
+                    <div class="wallet-balance"><span class="currency-symbol">₹</span><span id="walletBalancePage">0.00</span></div>
+                    <div class="wallet-sub-row">
+                        <div class="wallet-sub-item"><span class="wallet-sub-dot coins"></span><span>Total Coins: </span><span class="wallet-sub-value" id="totalCoinsPage">0</span></div>
+                    </div>
+                </div>
+                <p class="section-label">Recent Transactions</p>
+                <div id="transactionList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📄</div>
+                        <p class="empty-state-text">No transactions yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== TAB: Refer ========== -->
+            <div class="tab-panel" id="tab-refer">
+                <div style="padding:12px 4px 20px 4px;">
+                    <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.4px;">Refer & Earn</h2>
+                    <p style="font-size:13px;color:var(--text-muted);margin-top:4px;">Invite friends and earn rewards together</p>
+                </div>
+                <div class="referral-banner" style="margin-bottom:16px;">
+                    <div class="referral-banner-content">
+                        <div class="referral-banner-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        </div>
+                        <div class="referral-banner-text">
+                            <p class="referral-banner-title">Your Referral Code</p>
+                            <p class="referral-banner-amount" id="referralCodeDisplay" style="font-size:20px;font-family:var(--font-mono);">————</p>
+                            <p class="referral-banner-subtitle">Earn <strong id="referralPerPerson">₹25</strong> per friend</p>
+                        </div>
+                        <button class="btn-copy-referral" id="btnCopyReferralTab">Copy</button>
+                    </div>
+                </div>
+                <p class="section-label">Referral Stats</p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <p class="stat-card-value" id="refStatCount">0</p>
+                        <p class="stat-card-label">Total Referrals</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-card-value text-gold" id="refStatEarnings">₹0</p>
+                        <p class="stat-card-label">Referral Earnings</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== TAB: Profile ========== -->
+            <div class="tab-panel" id="tab-profile">
+                <div style="padding:12px 4px 20px 4px;text-align:center;">
+                    <div style="width:72px;height:72px;border-radius:50%;background:var(--bg-card);border:3px solid var(--border-card);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                        <span class="avatar-placeholder" id="profileAvatarPlaceholder" style="font-size:26px;">?</span>
+                        <img src="" alt="Profile" id="profileAvatarImage" style="display:none;width:100%;height:100%;object-fit:cover;">
+                    </div>
+                    <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.4px;" id="profileName">User</h2>
+                    <p style="font-size:13px;color:var(--text-muted);" id="profileEmail">—</p>
+                </div>
+                <button style="width:100%;padding:14px;border-radius:var(--radius-md);background:rgba(232,96,122,0.1);border:1px solid rgba(232,96,122,0.25);color:var(--accent-rose);font-weight:600;font-size:15px;cursor:pointer;margin-top:12px;letter-spacing:0.3px;" id="btnLogout">
+                    Sign Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav" id="bottomNav">
+            <div class="nav-item active" data-tab="dashboard">
+                <div class="nav-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                </div>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-tab="tasks">
+                <div class="nav-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </div>
+                <span>Tasks</span>
+            </div>
+            <div class="nav-item" data-tab="wallet">
+                <div class="nav-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                </div>
+                <span>Wallet</span>
+            </div>
+            <div class="nav-item" data-tab="refer">
+                <div class="nav-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                </div>
+                <span>Refer</span>
+            </div>
+            <div class="nav-item" data-tab="profile">
+                <div class="nav-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <span>Profile</span>
+            </div>
+        </nav>
+
+        <!-- Toast -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script>
+        (function() {
+            // ============ STRICT MODE & GLOBALS ============
+            'use strict';
+
+            // ============ DOM REFS ============
+            const $ = (sel) => document.querySelector(sel);
+            const $$ = (sel) => document.querySelectorAll(sel);
+
+            const mainScroll = $('#mainScroll');
+            const dashboardHeader = $('#dashboardHeader');
+            const skeletonWallet = $('#skeletonWallet');
+            const walletCardWrapper = $('#walletCardWrapper');
+            const walletBalanceDisplay = $('#walletBalanceDisplay');
+            const totalCoinsDisplay = $('#totalCoinsDisplay');
+            const todayEarningsDisplay = $('#todayEarningsDisplay');
+            const greetingLabel = $('#greetingLabel');
+            const greetingName = $('#greetingName');
+            const avatarPlaceholder = $('#avatarPlaceholder');
+            const avatarImage = $('#avatarImage');
+            const profileAvatarPlaceholder = $('#profileAvatarPlaceholder');
+            const profileAvatarImage = $('#profileAvatarImage');
+            const profileName = $('#profileName');
+            const profileEmail = $('#profileEmail');
+            const notificationBadge = $('#notificationBadge');
+            const taskCountBadge = $('#taskCountBadge');
+            const featuredTasksList = $('#featuredTasksList');
+            const tasksEmptyState = $('#tasksEmptyState');
+            const allTasksList = $('#allTasksList');
+            const allTasksEmpty = $('#allTasksEmpty');
+            const referralEarningAmount = $('#referralEarningAmount');
+            const referralCodeDisplay = $('#referralCodeDisplay');
+            const referralPerPerson = $('#referralPerPerson');
+            const statTotalEarnings = $('#statTotalEarnings');
+            const statCompletedTasks = $('#statCompletedTasks');
+            const statReferralCount = $('#statReferralCount');
+            const statWithdrawalStatus = $('#statWithdrawalStatus');
+            const refStatCount = $('#refStatCount');
+            const refStatEarnings = $('#refStatEarnings');
+            const walletBalancePage = $('#walletBalancePage');
+            const totalCoinsPage = $('#totalCoinsPage');
+            const toast = $('#toast');
+            const btnCopyReferral = $('#btnCopyReferral');
+            const btnCopyReferralTab = $('#btnCopyReferralTab');
+            const btnLogout = $('#btnLogout');
+            const bottomNav = $('#bottomNav');
+
+            // ============ STATE ============
+            let currentUser = null;
+            let userData = null;
+            let walletData = null;
+            let statsData = null;
+            let referralData = null;
+            let tasksData = [];
+            let activeTab = 'dashboard';
+            let toastTimer = null;
+
+            // ============ FIREBASE INITIALIZATION ============
+            function getFirebase() {
+                // Check if firebase is already initialized by the external config
+                if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+                    return firebase;
+                }
+                // Fallback: initialize with provided config
+                if (typeof firebase !== 'undefined') {
+                    const fbConfig = {
+                        apiKey: "AIzaSyDYdTJdXbxZ4bUGW-wO1BRaszEUb2Q_BAg",
+                        authDomain: "shivearnapp.firebaseapp.com",
+                        databaseURL: "https://shivearnapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+                        projectId: "shivearnapp",
+                        storageBucket: "shivearnapp.firebasestorage.app",
+                        messagingSenderId: "467728812929",
+                        appId: "1:467728812929:web:a73f12827309d9c09d7680"
+                    };
+                    try {
+                        firebase.initializeApp(fbConfig);
+                    } catch (e) {
+                        // App may already exist
+                        if (e.code !== 'app/duplicate-app') {
+                            console.warn('Firebase init warning:', e.message);
+                        }
+                    }
+                    return firebase;
+                }
+                return null;
+            }
+
+            const fb = getFirebase();
+
+            if (!fb) {
+                showToast('Unable to connect. Please refresh.', false);
+                console.error('Firebase SDK not loaded.');
+                // Still render skeleton UI
+                renderSkeletonState();
+            }
+
+            // ============ AUTH CHECK ============
+            function checkAuth() {
+                if (!fb || !fb.auth) {
+                    console.error('Firebase Auth not available');
+                    redirectToLogin();
+                    return;
+                }
+                fb.auth().onAuthStateChanged((user) => {
+                    if (user) {
+                        currentUser = user;
+                        onUserAuthenticated(user);
+                    } else {
+                        redirectToLogin();
+                    }
+                });
+            }
+
+            function redirectToLogin() {
+                // Redirect to login page
+                const loginPath = 'login.html';
+                if (window.location.pathname.includes('dashboard')) {
+                    window.location.replace(loginPath + '?redirect=' + encodeURIComponent(window.location
+                        .pathname));
+                } else {
+                    window.location.replace(loginPath);
+                }
+            }
+
+            function onUserAuthenticated(user) {
+                // Hide skeleton, load data
+                skeletonWallet.classList.add('hidden');
+                walletCardWrapper.classList.remove('hidden');
+                updateUserProfileUI(user);
+                fetchAllUserData(user.uid);
+            }
+
+            function updateUserProfileUI(user) {
+                const displayName = user.displayName || 'User';
+                const photoURL = user.photoURL || null;
+                const email = user.email || '—';
+                const initials = getInitials(displayName);
+
+                // Header avatar
+                avatarPlaceholder.textContent = initials;
+                if (photoURL) {
+                    avatarImage.src = photoURL;
+                    avatarImage.style.display = 'block';
+                    avatarPlaceholder.style.display = 'none';
+                } else {
+                    avatarImage.style.display = 'none';
+                    avatarPlaceholder.style.display = 'flex';
+                }
+
+                // Profile tab
+                profileAvatarPlaceholder.textContent = initials;
+                if (photoURL) {
+                    profileAvatarImage.src = photoURL;
+                    profileAvatarImage.style.display = 'block';
+                    profileAvatarPlaceholder.style.display = 'none';
+                } else {
+                    profileAvatarImage.style.display = 'none';
+                    profileAvatarPlaceholder.style.display = 'flex';
+                }
+                profileName.textContent = displayName;
+                profileEmail.textContent = email;
+                greetingName.textContent = displayName;
+
+                // Set greeting based on time
+                const hour = new Date().getHours();
+                let greeting = 'Good Morning';
+                if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+                if (hour >= 17 && hour < 21) greeting = 'Good Evening';
+                if (hour >= 21 || hour < 5) greeting = 'Good Night';
+                greetingLabel.textContent = greeting;
+            }
+
+            function getInitials(name) {
+                if (!name || name === 'User') return '?';
+                const parts = name.trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                }
+                return name.substring(0, 2).toUpperCase();
+            }
+
+            // ============ DATA FETCHING ============
+            function fetchAllUserData(uid) {
+                if (!fb || !fb.database) {
+                    console.error('Firebase Database not available');
+                    return;
+                }
+                const db = fb.database();
+                const userRef = db.ref('users/' + uid);
+
+                // Show skeleton briefly
+                renderSkeletonState();
+                showSkeletonLoading();
+
+                userRef.once('value')
+                    .then((snapshot) => {
+                        hideSkeletonLoading();
+                        if (snapshot.exists()) {
+                            const data = snapshot.val();
+                            userData = data.profile || {};
+                            walletData = data.wallet || {};
+                            statsData = data.stats || {};
+                            referralData = data.referrals || {};
+                            tasksData = data.tasks || [];
+
+                            // Update display name if available
+                            if (userData.name && currentUser) {
+                                greetingName.textContent = userData.name;
+                            }
+
+                            renderAllComponents();
+                        } else {
+                            // Create default structure
+                            const defaultData = {
+                                profile: {
+                                    name: currentUser?.displayName || 'User',
+                                    email: currentUser?.email || '',
+                                    joinDate: new Date().toISOString()
+                                },
+                                wallet: {
+                                    balance: 0,
+                                    totalCoins: 0,
+                                    todayEarnings: 0
+                                },
+                                stats: {
+                                    totalEarnings: 0,
+                                    completedTasks: 0,
+                                    referralCount: 0,
+                                    withdrawalStatus: 'pending'
+                                },
+                                referrals: {
+                                    referralCode: generateReferralCode(),
+                                    earnings: 0,
+                                    count: 0,
+                                    perPerson: 25
+                                },
+                                tasks: []
+                            };
+                            userRef.set(defaultData).then(() => {
+                                userData = defaultData.profile;
+                                walletData = defaultData.wallet;
+                                statsData = defaultData.stats;
+                                referralData = defaultData.referrals;
+                                tasksData = defaultData.tasks;
+                                renderAllComponents();
+                            }).catch((err) => {
+                                console.error('Error creating user data:', err);
+                                renderAllComponents();
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        hideSkeletonLoading();
+                        console.error('Error fetching user data:', error);
+                        showToast('Error loading data. Pull to refresh.', false);
+                        renderAllComponents();
+                    });
+
+                // Also fetch global tasks
+                db.ref('tasks').once('value')
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const globalTasks = snapshot.val();
+                            // Merge or use global tasks if user has none
+                            if (!tasksData || tasksData.length === 0) {
+                                tasksData = Array.isArray(globalTasks) ? globalTasks : Object.values(
+                                    globalTasks);
+                                renderTasksList();
+                            }
+                        }
+                    })
+                    .catch(() => {});
+            }
+
+            function generateReferralCode() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let code = 'SE';
+                for (let i = 0; i < 6; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return code;
+            }
+
+            // ============ SKELETON LOADING ============
+            function showSkeletonLoading() {
+                skeletonWallet.classList.remove('hidden');
+                walletCardWrapper.classList.add('hidden');
+            }
+
+            function hideSkeletonLoading() {
+                skeletonWallet.classList.add('hidden');
+                walletCardWrapper.classList.remove('hidden');
+            }
+
+            function renderSkeletonState() {
+                skeletonWallet.classList.remove('hidden');
+                walletCardWrapper.classList.add('hidden');
+            }
+
+            // ============ RENDER ALL COMPONENTS ============
+            function renderAllComponents() {
+                renderWalletCard();
+                renderTasksList();
+                renderReferralBanner();
+                renderStats();
+                renderWalletPage();
+                renderReferralTab();
+            }
+
+            function renderWalletCard() {
+                const balance = safeNumber(walletData?.balance, 0);
+                const totalCoins = safeNumber(walletData?.totalCoins, 0);
+                const todayEarnings = safeNumber(walletData?.todayEarnings, 0);
+
+                animateCounter(walletBalanceDisplay, balance, 2, '₹');
+                totalCoinsDisplay.textContent = formatNumber(totalCoins);
+                todayEarningsDisplay.textContent = '₹' + formatNumber(todayEarnings);
+            }
+
+            function renderTasksList() {
+                const tasks = Array.isArray(tasksData) ? tasksData : [];
+                taskCountBadge.textContent = tasks.length;
+
+                // Featured tasks on dashboard
+                if (tasks.length === 0) {
+                    featuredTasksList.innerHTML = '';
+                    tasksEmptyState.classList.remove('hidden');
+                } else {
+                    tasksEmptyState.classList.add('hidden');
+                    const featured = tasks.slice(0, 3);
+                    featuredTasksList.innerHTML = featured.map((task, idx) => {
+                        const title = task.title || 'Task ' + (idx + 1);
+                        const reward = safeNumber(task.reward, 0);
+                        const progress = safeNumber(task.progress, 0);
+                        const category = task.category || 'social';
+                        const iconBg = getTaskIconBg(category);
+                        const iconColor = getTaskIconColor(category);
+                        return `
+                                <div class="task-card" data-task-id="${task.id || idx}">
+                                    <div class="task-card-icon" style="background:${iconBg};color:${iconColor};">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            ${getTaskIconPath(category)}
+                                        </svg>
+                                    </div>
+                                    <div class="task-card-info">
+                                        <p class="task-card-title">${escapeHTML(title)}</p>
+                                        <p class="task-card-meta">${task.description || 'Complete to earn'}</p>
+                                        <div class="task-progress-bar">
+                                            <div class="task-progress-fill" style="width:${Math.min(progress, 100)}%;"></div>
+                                        </div>
+                                    </div>
+                                    <span class="task-card-reward">+₹${formatNumber(reward)}</span>
+                                </div>
+                            `;
+                    }).join('');
+                }
+
+                // All tasks tab
+                if (tasks.length === 0) {
+                    allTasksList.innerHTML = '';
+                    allTasksEmpty.classList.remove('hidden');
+                } else {
+                    allTasksEmpty.classList.add('hidden');
+                    allTasksList.innerHTML = tasks.map((task, idx) => {
+                        const title = task.title || 'Task ' + (idx + 1);
+                        const reward = safeNumber(task.reward, 0);
+                        const progress = safeNumber(task.progress, 0);
+                        const category = task.category || 'social';
+                        const iconBg = getTaskIconBg(category);
+                        const iconColor = getTaskIconColor(category);
+                        return `
+                                <div class="task-card" data-task-id="${task.id || idx}" style="margin-bottom:8px;">
+                                    <div class="task-card-icon" style="background:${iconBg};color:${iconColor};">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            ${getTaskIconPath(category)}
+                                        </svg>
+                                    </div>
+                                    <div class="task-card-info">
+                                        <p class="task-card-title">${escapeHTML(title)}</p>
+                                        <p class="task-card-meta">${task.description || 'Complete to earn'}</p>
+                                        <div class="task-progress-bar">
+                                            <div class="task-progress-fill" style="width:${Math.min(progress, 100)}%;"></div>
+                                        </div>
+                                    </div>
+                                    <span class="task-card-reward">+₹${formatNumber(reward)}</span>
+                                </div>
+                            `;
+                    }).join('');
+                }
+            }
+
+            function renderReferralBanner() {
+                const perPerson = safeNumber(referralData?.perPerson, 25);
+                const earnings = safeNumber(referralData?.earnings, 0);
+                referralEarningAmount.textContent = '₹' + formatNumber(perPerson) + '.00';
+                referralPerPerson.textContent = '₹' + formatNumber(perPerson);
+                refStatEarnings.textContent = '₹' + formatNumber(earnings);
+            }
+
+            function renderReferralTab() {
+                const code = referralData?.referralCode || generateReferralCode();
+                const perPerson = safeNumber(referralData?.perPerson, 25);
+                const count = safeNumber(referralData?.count || statsData?.referralCount, 0);
+                const earnings = safeNumber(referralData?.earnings, 0);
+
+                referralCodeDisplay.textContent = code;
+                referralPerPerson.textContent = '₹' + formatNumber(perPerson);
+                refStatCount.textContent = count;
+                refStatEarnings.textContent = '₹' + formatNumber(earnings);
+            }
+
+            function renderStats() {
+                const totalEarnings = safeNumber(statsData?.totalEarnings || walletData?.balance, 0);
+                const completedTasks = safeNumber(statsData?.completedTasks, 0);
+                const referralCount = safeNumber(statsData?.referralCount || referralData?.count, 0);
+                const withdrawalStatus = statsData?.withdrawalStatus || '—';
+
+                statTotalEarnings.textContent = '₹' + formatNumber(totalEarnings);
+                statCompletedTasks.textContent = formatNumber(completedTasks);
+                statReferralCount.textContent = formatNumber(referralCount);
+                statWithdrawalStatus.textContent =
+                    withdrawalStatus === 'completed' ? 'Approved' :
+                    withdrawalStatus === 'pending' ? 'Pending' :
+                    withdrawalStatus === 'processing' ? 'Processing' :
+                    withdrawalStatus === '—' ? '—' : capitalizeFirst(withdrawalStatus);
+            }
+
+            function renderWalletPage() {
+                const balance = safeNumber(walletData?.balance, 0);
+                const totalCoins = safeNumber(walletData?.totalCoins, 0);
+                walletBalancePage.textContent = formatNumber(balance, 2);
+                totalCoinsPage.textContent = formatNumber(totalCoins);
+            }
+
+            // ============ ANIMATED COUNTER ============
+            function animateCounter(element, targetValue, decimals, prefix) {
+                if (!element) return;
+                const startValue = 0;
+                const duration = 1000; // ms
+                const startTime = performance.now();
+                const prefixStr = prefix || '';
+
+                function update(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    // Ease-out cubic
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const current = startValue + (targetValue - startValue) * eased;
+                    element.textContent = prefixStr + formatNumber(current, decimals);
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    } else {
+                        element.textContent = prefixStr + formatNumber(targetValue, decimals);
+                    }
+                }
+                requestAnimationFrame(update);
+            }
+
+            // ============ TASK ICON HELPERS ============
+            function getTaskIconBg(category) {
+                const map = {
+                    social: 'rgba(91,141,239,0.12)',
+                    daily: 'rgba(232,184,85,0.12)',
+                    reward: 'rgba(139,108,246,0.12)',
+                    featured: 'rgba(76,175,132,0.12)',
+                    premium: 'rgba(232,184,85,0.15)'
+                };
+                return map[category] || 'rgba(180,180,200,0.12)';
+            }
+
+            function getTaskIconColor(category) {
+                const map = {
+                    social: 'var(--accent-blue)',
+                    daily: 'var(--accent-gold)',
+                    reward: 'var(--accent-purple)',
+                    featured: 'var(--accent-green)',
+                    premium: 'var(--accent-gold)'
+                };
+                return map[category] || '#b4b4c8';
+            }
+
+            function getTaskIconPath(category) {
+                const paths = {
+                    social: '<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/>',
+                    daily: '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/>',
+                    reward: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+                    featured: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+                    premium: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
+                };
+                return paths[category] || '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>';
+            }
+
+            // ============ UTILITY FUNCTIONS ============
+            function safeNumber(val, fallback) {
+                if (val === null || val === undefined || isNaN(Number(val))) return fallback || 0;
+                return Number(val);
+            }
+
+            function formatNumber(num, decimals) {
+                const d = (decimals !== undefined) ? decimals : (Number.isInteger(num) ? 0 : 2);
+                if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                return num.toFixed(d);
+            }
+
+            function escapeHTML(str) {
+                if (!str) return '';
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function capitalizeFirst(str) {
+                if (!str || str === '—') return str;
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+
+            // ============ TOAST ============
+            function showToast(message, isSuccess = true) {
+                if (toastTimer) clearTimeout(toastTimer);
+                toast.textContent = message;
+                toast.className = 'toast ' + (isSuccess ? 'success' : '');
+                // Force reflow
+                void toast.offsetWidth;
+                toast.classList.add('show');
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                    toastTimer = null;
+                }, 2500);
+            }
+
+            // ============ BOTTOM NAVIGATION ============
+            function switchTab(tabName) {
+                if (activeTab === tabName) return;
+                activeTab = tabName;
+
+                // Update panels
+                $$('.tab-panel').forEach(p => p.classList.remove('active'));
+                const targetPanel = $('#tab-' + tabName);
+                if (targetPanel) targetPanel.classList.add('active');
+
+                // Update nav items
+                $$('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.tab === tabName) item.classList.add('active');
+                });
+
+                // Scroll to top
+                mainScroll.scrollTop = 0;
+            }
+
+            bottomNav.addEventListener('click', (e) => {
+                const navItem = e.target.closest('.nav-item');
+                if (!navItem) return;
+                const tabName = navItem.dataset.tab;
+                if (tabName) switchTab(tabName);
+            });
+
+            // ============ QUICK ACTION BUTTONS ============
+            document.addEventListener('click', (e) => {
+                const actionBtn = e.target.closest('.quick-action-btn');
+                if (!actionBtn) return;
+                const action = actionBtn.dataset.action;
+                handleQuickAction(action);
+            });
+
+            function handleQuickAction(action) {
+                switch (action) {
+                    case 'tasks':
+                        switchTab('tasks');
+                        break;
+                    case 'daily':
+                        showToast('🎁 Daily reward claimed! +₹5', true);
+                        // Update wallet if possible
+                        incrementTodayEarnings(5);
+                        break;
+                    case 'refer':
+                        switchTab('refer');
+                        break;
+                    case 'withdraw':
+                        showToast('Withdrawal request submitted for review.', true);
+                        break;
+                    case 'history':
+                        switchTab('wallet');
+                        break;
+                    case 'support':
+                        showToast('Support team will contact you soon.', true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            function incrementTodayEarnings(amount) {
+                if (!fb || !fb.database || !currentUser) return;
+                const db = fb.database();
+                const uid = currentUser.uid;
+                const walletRef = db.ref('users/' + uid + '/wallet');
+                walletRef.transaction((wallet) => {
+                    if (!wallet) wallet = { balance: 0, totalCoins: 0, todayEarnings: 0 };
+                    wallet.balance = (wallet.balance || 0) + amount;
+                    wallet.todayEarnings = (wallet.todayEarnings || 0) + amount;
+                    wallet.totalCoins = (wallet.totalCoins || 0) + Math.floor(amount);
+                    return wallet;
+                }).then(() => {
+                    // Refresh local data
+                    if (walletData) {
+                        walletData.balance = (walletData.balance || 0) + amount;
+                        walletData.todayEarnings = (walletData.todayEarnings || 0) + amount;
+                        walletData.totalCoins = (walletData.totalCoins || 0) + Math.floor(amount);
+                    }
+                    renderWalletCard();
+                    renderWalletPage();
+                    renderStats();
+                }).catch(() => {});
+            }
+
+            // ============ COPY REFERRAL ============
+            function copyReferralLink() {
+                const code = referralData?.referralCode || referralCodeDisplay.textContent || 'SHIVEARN';
+                const link = 'https://shivearn.app/join?ref=' + code;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(link).then(() => {
+                        showToast('✅ Referral link copied!', true);
+                        pulseCopyButton();
+                    }).catch(() => {
+                        fallbackCopy(link);
+                    });
+                } else {
+                    fallbackCopy(link);
+                }
+            }
+
+            function fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('✅ Referral link copied!', true);
+                    pulseCopyButton();
+                } catch (e) {
+                    showToast('Failed to copy. Please try again.', false);
+                }
+                document.body.removeChild(textarea);
+            }
+
+            function pulseCopyButton() {
+                [btnCopyReferral, btnCopyReferralTab].forEach(btn => {
+                    if (btn) {
+                        btn.classList.add('copied');
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            btn.classList.remove('copied');
+                            btn.textContent = 'Copy Link';
+                            if (btn === btnCopyReferralTab) btn.textContent = 'Copy';
+                        }, 1800);
+                    }
+                });
+            }
+
+            btnCopyReferral.addEventListener('click', copyReferralLink);
+            btnCopyReferralTab.addEventListener('click', copyReferralLink);
+
+            // ============ LOGOUT ============
+            btnLogout.addEventListener('click', () => {
+                if (fb && fb.auth) {
+                    fb.auth().signOut().then(() => {
+                        redirectToLogin();
+                    }).catch(() => {
+                        showToast('Error signing out.', false);
+                    });
+                }
+            });
+
+            // ============ HEADER SCROLL EFFECT ============
+            mainScroll.addEventListener('scroll', () => {
+                if (mainScroll.scrollTop > 20) {
+                    dashboardHeader.classList.add('scrolled');
+                } else {
+                    dashboardHeader.classList.remove('scrolled');
+                }
+            }, { passive: true });
+
+            // ============ NOTIFICATION CLICK ============
+            $('#btnNotification').addEventListener('click', () => {
+                showToast('No new notifications', true);
+                notificationBadge.classList.add('hidden');
+            });
+
+            // ============ PROFILE AVATAR CLICK ============
+            $('#btnProfileAvatar').addEventListener('click', () => {
+                switchTab('profile');
+            });
+
+            // ============ TASK CARD CLICKS (delegated) ============
+            document.addEventListener('click', (e) => {
+                const taskCard = e.target.closest('.task-card');
+                if (!taskCard) return;
+                const taskId = taskCard.dataset.taskId;
+                if (taskId) {
+                    showToast('📋 Task started! Complete to earn rewards.', true);
+                }
+            });
+
+            // ============ INITIALIZATION ============
+            function init() {
+                if (fb) {
+                    checkAuth();
+                } else {
+                    // Firebase not loaded - show skeleton
+                    renderSkeletonState();
+                    console.error('Firebase SDK not available. Check your internet connection.');
+                }
+            }
+
+            // Start the app
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+            // ============ EXPORT FOR DEBUG ============
+            if (typeof window !== 'undefined') {
+                window.ShivEarnDashboard = {
+                    switchTab,
+                    showToast,
+                    refreshData: () => {
+                        if (currentUser) fetchAllUserData(currentUser.uid);
+                    },
+                    getState: () => ({
+                        currentUser,
+                        userData,
+                        walletData,
+                        statsData,
+                        referralData,
+                        tasksData,
+                        activeTab
+                    })
+                };
+            }
+        })();
+    </script>
+</body>
+</html>
