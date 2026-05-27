@@ -1,0 +1,296 @@
+<!-- tasks.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tasks</title>
+  <!-- Link to external CSS -->
+  <link rel="stylesheet" href="css/tasks.css">
+  <!-- Firebase configuration (initializes firebase, db, auth) -->
+  <script src="js/firebase/firebase-config.js"></script>
+</head>
+<body>
+  <!-- Header with back button, title, and profile link -->
+  <header class="tasks-header">
+    <button class="back-btn" onclick="history.back()" aria-label="Go back">🔙</button>
+    <h1>Tasks</h1>
+    <a href="profile.html" class="profile-btn" aria-label="Profile">👤</a>
+  </header>
+
+  <main class="tasks-main">
+    <!-- Loading state -->
+    <div id="loading-state" class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading tasks...</p>
+    </div>
+
+    <!-- Empty state when no tasks exist -->
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-icon">📋</div>
+      <p>No tasks available right now.</p>
+      <p>Check back later!</p>
+    </div>
+
+    <!-- Daily tasks section (hidden until data loads) -->
+    <section id="tasks-section" class="hidden">
+      <h2 class="section-title">Daily Tasks</h2>
+      <div id="tasks-container" class="tasks-grid">
+        <!-- Task cards inserted dynamically -->
+      </div>
+    </section>
+
+    <!-- Toast notification container -->
+    <div id="toast" class="toast hidden"></div>
+  </main>
+
+  <!-- JavaScript logic for Firebase integration and UI -->
+  <script>
+    // Ensure Firebase is available
+    if (typeof firebase === 'undefined') {
+      document.body.innerHTML = '<p style="text-align:center;padding:2rem;">Firebase SDK not loaded. Check configuration.</p>';
+    } else {
+      const db = firebase.database();
+      const auth = firebase.auth();
+
+      // DOM elements
+      const loadingState = document.getElementById('loading-state');
+      const emptyState = document.getElementById('empty-state');
+      const tasksSection = document.getElementById('tasks-section');
+      const tasksContainer = document.getElementById('tasks-container');
+      const toast = document.getElementById('toast');
+
+      let currentUser = null;
+      let userTasksRef = null;
+      let tasksListener = null;
+      let userTasksListener = null;
+      let tasksData = []; // store fetched tasks from DB
+
+      // ---------- Toast Notification ----------
+      function showToast(message, type = 'success') {
+        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        // Trigger reflow to restart animation
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        clearTimeout(toast.hideTimeout);
+        toast.hideTimeout = setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+
+      // ---------- Authentication Listener ----------
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          currentUser = user;
+          userTasksRef = db.ref(`users/${user.uid}/tasks`);
+          loadTasks();
+        } else {
+          // Redirect to login if not authenticated
+          window.location.href = 'login.html';
+        }
+      });
+
+      // ---------- Load Tasks from Realtime Database ----------
+      async function loadTasks() {
+        showLoading(true);
+        const tasksRef = db.ref('tasks');
+        try {
+          const snapshot = await tasksRef.once('value');
+          const tasksVal = snapshot.val();
+          if (tasksVal) {
+            // Convert to array with id
+            tasksData = Object.keys(tasksVal).map(key => ({
+              id: key,
+              ...tasksVal[key]
+            }));
+          } else {
+            tasksData = [];
+          }
+          // Start listening to user's task progress
+          listenToUserTasks();
+        } catch (error) {
+          console.error('Error loading tasks:', error);
+          showToast('Failed to load tasks. Please try again.', 'error');
+          showLoading(false);
+          showEmptyState();
+        }
+      }
+
+      // ---------- Listen to User's Task Progress ----------
+      function listenToUserTasks() {
+        // Remove previous listener to avoid duplicates
+        if (userTasksListener) {
+          userTasksRef.off('value', userTasksListener);
+        }
+        userTasksListener = userTasksRef.on('value', (snapshot) => {
+          const userTasks = snapshot.val() || {};
+          renderTasks(userTasks);
+          showLoading(false);
+        });
+      }
+
+      // ---------- Render All Task Cards ----------
+      function renderTasks(userTasks) {
+        if (tasksData.length === 0) {
+          showEmptyState();
+          return;
+        }
+        // Hide empty & loading states, show tasks section
+        emptyState.classList.add('hidden');
+        loadingState.classList.add('hidden');
+        tasksSection.classList.remove('hidden');
+
+        // Clear container
+        tasksContainer.innerHTML = '';
+
+        tasksData.forEach(task => {
+          const userTask = userTasks[task.id] || null;
+          const completed = !!(userTask && userTask.completed === true);
+          const card = createTaskCard(task, completed);
+          tasksContainer.appendChild(card);
+        });
+      }
+
+      // ---------- Create a Single Task Card ----------
+      function createTaskCard(task, completed) {
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.dataset.taskId = task.id;
+
+        // Icon based on task type
+        const icon = getTaskIcon(task.id);
+
+        card.innerHTML = `
+          <div class="task-icon">${icon}</div>
+          <div class="task-info">
+            <h3 class="task-title">${escapeHTML(task.title || 'Untitled Task')}</h3>
+            <p class="task-desc">${escapeHTML(task.description || '')}</p>
+            <div class="task-reward">
+              <span class="reward-icon">🪙</span>
+              <span class="reward-amount">+${task.reward || 0}</span>
+            </div>
+            <div class="task-footer">
+              <span class="status-badge ${completed ? 'completed' : 'pending'}">
+                ${completed ? 'Completed' : 'Pending'}
+              </span>
+              <button class="complete-btn ${completed ? 'disabled' : ''}" 
+                ${completed ? 'disabled' : ''} 
+                data-task-id="${task.id}" 
+                data-reward="${task.reward || 0}">
+                ${completed ? 'Done' : 'Complete'}
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Attach click handler only for non-completed tasks
+        if (!completed) {
+          const btn = card.querySelector('.complete-btn');
+          btn.addEventListener('click', handleCompleteTask);
+        }
+
+        return card;
+      }
+
+      // Escape HTML to prevent XSS
+      function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      // ---------- Task Icon Mapping ----------
+      function getTaskIcon(taskId) {
+        const icons = {
+          'watch_ad': '📺',
+          'join_telegram': '✈️',
+          'follow_instagram': '📸',
+          'refer_friend': '👥',
+          'login_bonus': '🎁'
+        };
+        return icons[taskId] || '✅';
+      }
+
+      // ---------- Handle Task Completion (Secure Transaction) ----------
+      async function handleCompleteTask(e) {
+        const btn = e.target;
+        const taskId = btn.dataset.taskId;
+        const reward = parseInt(btn.dataset.reward) || 0;
+
+        if (!currentUser) {
+          showToast('You must be logged in.', 'error');
+          return;
+        }
+
+        // Prevent duplicate submissions
+        btn.disabled = true;
+        btn.classList.add('loading');
+        btn.textContent = 'Claiming...';
+
+        const taskRef = userTasksRef.child(taskId);
+
+        // Atomic transaction to mark task completed only if not already done
+        taskRef.transaction((currentData) => {
+          if (currentData && currentData.completed === true) {
+            return; // abort transaction, already completed
+          }
+          return {
+            completed: true,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+          };
+        }, (error, committed, snapshot) => {
+          if (error) {
+            showToast('Error completing task. Please try again.', 'error');
+            resetButton(btn, 'Complete');
+            return;
+          }
+          if (!committed) {
+            showToast('Task already completed!', 'info');
+            resetButton(btn, 'Done');
+            return;
+          }
+
+          // Task marked – now securely add reward coins using transaction
+          const coinsRef = db.ref(`users/${currentUser.uid}/coins`);
+          coinsRef.transaction((currentCoins) => {
+            return (currentCoins || 0) + reward;
+          }, (coinError, coinCommitted) => {
+            if (coinError || !coinCommitted) {
+              showToast('Task completed, but coin credit failed. Contact support.', 'error');
+            } else {
+              showToast(`Task completed! +${reward} coins earned!`, 'success');
+            }
+            // The real-time listener will automatically update the card to "Completed" state.
+            // No need to manually re-enable the button; it will be replaced.
+          });
+        });
+      }
+
+      // Reset button to initial state (used when transaction aborts)
+      function resetButton(btn, text) {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        btn.textContent = text;
+      }
+
+      // ---------- UI State Helpers ----------
+      function showLoading(isLoading) {
+        if (isLoading) {
+          loadingState.classList.remove('hidden');
+          emptyState.classList.add('hidden');
+          tasksSection.classList.add('hidden');
+        } else {
+          loadingState.classList.add('hidden');
+        }
+      }
+
+      function showEmptyState() {
+        loadingState.classList.add('hidden');
+        tasksSection.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
